@@ -1,0 +1,156 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/*
+ * Tokens do Figma (variáveis "color/*" e "text/*").
+ * Os nomes semânticos do shadcn/ui (background, card, primary…) apontam para
+ * a paleta da Kurio, para que os componentes herdem a identidade do projeto.
+ */
+:root {
+  --ink: #140d0a;
+  --surface: #241612;
+  --surface-raised: #2f1d15;
+  --surface-dark: #38220f;
+  --brand: #d28a4c;
+  --highlight: #e89b55;
+  --cream: #f5f1eb;
+  --sand: #cfb28c;
+  --subtle: #b39463;
+  --coral: #f0805f;
+  --amber: #e3a44e;
+  --line: #3f2319;
+  --line-soft: #55321f;
+
+  --background: var(--ink);
+  --foreground: var(--cream);
+  --card: var(--surface);
+  --card-foreground: var(--cream);
+  --popover: var(--surface);
+  --popover-foreground: var(--cream);
+  --primary: var(--brand);
+  --primary-foreground: var(--ink);
+  --secondary: var(--surface-raised);
+  --secondary-foreground: var(--cream);
+  --muted: var(--surface-raised);
+  --muted-foreground: var(--sand);
+  --accent: var(--surface-raised);
+  --accent-foreground: var(--highlight);
+  --destructive: var(--coral);
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--highlight);
+  --radius: 6px;
+
+  color-scheme: dark;
+}
+
+@theme inline {
+  --font-sans: "Roboto Mono Variable", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --font-mono: "Roboto Mono Variable", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+
+  --color-ink: var(--ink);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-dark: var(--surface-dark);
+  --color-highlight: var(--highlight);
+  --color-sand: var(--sand);
+  --color-subtle: var(--subtle);
+  --color-coral: var(--coral);
+  --color-amber: var(--amber);
+  --color-border-soft: var(--line-soft);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: 3px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 15px;
+  --radius-2xl: 24px;
+
+  --shadow-control: 0 4px 6px rgb(20 13 10 / 0.15);
+  --shadow-glow: 0 0 10px rgb(10 6 4 / 0.45);
+  --shadow-glow-lg: 0 0 20px rgb(10 6 4 / 0.45);
+
+  --animate-shimmer: shimmer 1.6s linear infinite;
+
+  @keyframes shimmer {
+    from {
+      background-position: 200% 0;
+    }
+    to {
+      background-position: -200% 0;
+    }
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scrollbar-gutter: stable;
+  }
+
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+    font-size: 15px;
+    line-height: 1.4;
+    min-width: 320px;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+
+  ::selection {
+    background: var(--brand);
+    color: var(--ink);
+  }
+}
+
+@layer components {
+  /* largura de conteúdo do Figma: 1200px com margem de 120px em 1440 */
+  .container-page {
+    @apply mx-auto w-full max-w-[1248px] px-4 md:px-6;
+  }
+
+  /* linha fina de 0,3px do Figma; 1px com opacidade mantém a aparência em telas 1x */
+  .hairline {
+    @apply h-px w-full bg-primary/50;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
