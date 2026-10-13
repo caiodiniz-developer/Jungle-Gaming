@@ -6,30 +6,25 @@ import { useUpdateCachedUser } from "@/features/auth/session";
 import { queryKeys } from "@/lib/query-keys";
 import { useSessionKey, useSessionToken } from "@/lib/use-session-token";
 
-// salva o perfil
 export function useUpdateProfile() {
   const updateCachedUser = useUpdateCachedUser();
   return useMutation({ mutationFn: updateProfile, onSuccess: updateCachedUser });
 }
 
-// envia o avatar
 export function useUpdateAvatar() {
   const updateCachedUser = useUpdateCachedUser();
   return useMutation({ mutationFn: updateAvatar, onSuccess: updateCachedUser });
 }
 
-// remove o avatar
 export function useRemoveAvatar() {
   const updateCachedUser = useUpdateCachedUser();
   return useMutation({ mutationFn: removeAvatar, onSuccess: updateCachedUser });
 }
 
-// troca a senha
 export function useChangePassword() {
   return useMutation({ mutationFn: changePassword });
 }
 
-// carteiras do usuário
 export function useWallets() {
   const token = useSessionToken();
   const sessionKey = useSessionKey();

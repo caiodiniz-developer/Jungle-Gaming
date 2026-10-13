@@ -16,7 +16,6 @@ export function toNftListQuery(params: NftListParams): Record<string, string | n
   return query;
 }
 
-// lista NFTs com busca, filtros, ordenação e paginação
 export async function listNfts(params: NftListParams, options?: RequestOptions) {
   const { data } = await http.get<NftListResponse>("/nfts", {
     ...options,
@@ -25,7 +24,6 @@ export async function listNfts(params: NftListParams, options?: RequestOptions) 
   return data;
 }
 
-// busca o detalhe de um NFT
 export async function getNft(nftId: string, options?: RequestOptions) {
   const { data } = await http.get<NftDetail>(`/nfts/${encodeURIComponent(nftId)}`, options);
   return data;

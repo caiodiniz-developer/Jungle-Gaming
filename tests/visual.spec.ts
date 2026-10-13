@@ -62,7 +62,7 @@ test.describe("Regressão visual", () => {
   test("pagamento", async ({ app, page }) => {
     await app.addToCart("nft-0009");
     await app.goToCheckout({ connect: false });
-    await expect(app.quoteTotal()).toHaveText("1.706 ETH");
+    await expect(app.checkoutTotal()).toHaveText("1.706 ETH");
     await settle(page);
     await expect(page).toHaveScreenshot("pagamento.png");
   });

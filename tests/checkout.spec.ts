@@ -158,7 +158,7 @@ test.describe("Pagamento e confirmação", () => {
 
     // a carteira passa a aceitar
     await app.mocks("patchConfig", { walletRefuses: false });
-    await page.getByRole("radio", { name: /Reserva/ }).check();
+    await page.getByRole("checkbox", { name: "Usar outra carteira?" }).check();
     await expect(page.getByRole("combobox", { name: "Rede" })).toHaveValue("polygon");
     await app.connectWallet();
     await expect(page.getByText("Reserva · Coinbase Wallet · Polygon", { exact: false })).toBeVisible();

@@ -52,7 +52,7 @@ test.describe("Perfil e carteiras", () => {
 
   test("senha: confirmação diferente, senha atual incorreta e troca efetiva", async ({ app, page }) => {
     await app.loginAndOpen("/conta/perfil");
-    const change = page.getByRole("button", { name: "Alterar senha" });
+    const change = page.getByRole("button", { name: "Salvar", exact: true });
 
     await page.getByLabel("Senha atual").fill("errada12345");
     await page.getByLabel("Nova senha", { exact: true }).fill("NovaSenha1");

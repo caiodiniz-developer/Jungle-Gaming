@@ -43,10 +43,8 @@ export type MockConfig = {
   onOrderSubmit: "none" | "price-change" | "sold-out";
 };
 
-// um dia em ms
 const DAY = 24 * 60 * 60 * 1000;
 
-// configuração padrão
 const BASE: Omit<MockConfig, "scenario"> = {
   seed: 42,
   latency: { min: 120, max: 380 },
@@ -69,7 +67,6 @@ type ScenarioDefinition = {
   overrides: Partial<Omit<MockConfig, "scenario">>;
 };
 
-// cenários nomeados
 export const SCENARIOS = {
   padrao: {
     label: "Padrão",
@@ -165,18 +162,15 @@ export const SCENARIOS = {
 
 export type ScenarioId = keyof typeof SCENARIOS;
 
-// diz se o valor é um cenário válido
 export function isScenarioId(value: unknown): value is ScenarioId {
   return typeof value === "string" && value in SCENARIOS;
 }
 
-// monta a configuração de um cenário
 export function buildConfig(scenario: ScenarioId, overrides: Partial<MockConfig> = {}): MockConfig {
   const preset: ScenarioDefinition = SCENARIOS[scenario];
   return structuredClone({ ...BASE, ...preset.overrides, ...overrides, scenario });
 }
 
-// chave no localStorage
 const STORAGE_KEY = "kurio.mock.config";
 
 type StoredConfig = {
@@ -187,7 +181,6 @@ type StoredConfig = {
 
 let state: StoredConfig = load();
 
-// carrega a configuração gravada
 function load(): StoredConfig {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
@@ -208,7 +201,6 @@ function load(): StoredConfig {
   return { config: buildConfig("padrao"), faultHits: [], requestCounts: {} };
 }
 
-// grava a configuração
 function save() {
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -217,7 +209,6 @@ function save() {
   }
 }
 
-// configuração atual
 export function getConfig(): MockConfig {
   return state.config;
 }
@@ -228,18 +219,15 @@ export function setConfig(config: MockConfig) {
   save();
 }
 
-// troca de cenário
 export function setScenario(scenario: ScenarioId, overrides: Partial<MockConfig> = {}) {
   setConfig(buildConfig(scenario, overrides));
 }
 
-// altera parte da configuração
 export function patchConfig(patch: Partial<MockConfig>) {
   state.config = { ...state.config, ...structuredClone(patch) };
   save();
 }
 
-// diz se a rota casa com o padrão
 function routeMatches(pattern: string, method: string, path: string): boolean {
   const [patternMethod = "*", patternPath = "*"] = pattern.split(" ");
   if (patternMethod !== "*" && patternMethod.toUpperCase() !== method.toUpperCase()) return false;
@@ -265,7 +253,6 @@ export function takeFault(method: string, path: string): FaultRule | null {
   return rule;
 }
 
-// gerador pseudoaleatório com semente
 export function mulberry32(seed: number) {
   let a = seed >>> 0;
   return () => {

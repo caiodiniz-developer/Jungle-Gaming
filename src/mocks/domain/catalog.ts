@@ -13,12 +13,9 @@ import { db } from "@/mocks/db";
 import { CATEGORIES } from "@/mocks/fixtures/nfts";
 import type { DbNft } from "@/mocks/types";
 
-// itens por página
 export const DEFAULT_PAGE_SIZE = 9;
-// limite de itens por página
 const MAX_PAGE_SIZE = 48;
 
-// diz se há alguma edição disponível
 export function isNftAvailable(nft: DbNft): boolean {
   return nft.editions.some((edition) => edition.available > 0);
 }
@@ -29,7 +26,6 @@ function defaultEdition(nft: DbNft) {
   return available.find((edition) => edition.id === "1-50") ?? available[0];
 }
 
-// NFT do banco → resumo da API
 export function toNftSummary(nft: DbNft): NftSummary {
   return {
     id: nft.id,
@@ -48,7 +44,6 @@ export function toNftSummary(nft: DbNft): NftSummary {
   };
 }
 
-// NFT do banco → detalhe da API
 export function toNftDetail(nft: DbNft): NftDetail {
   const related = db()
     .nfts.filter((item) => item.collection === nft.collection && item.id !== nft.id)
@@ -70,7 +65,6 @@ export function toNftDetail(nft: DbNft): NftDetail {
   };
 }
 
-// busca um NFT pelo id
 export function findNft(nftId: string): DbNft | undefined {
   return db().nfts.find((nft) => nft.id === nftId);
 }
@@ -86,7 +80,6 @@ function normalize(text: string): string {
 type Filters = Required<Pick<NftListParams, "categories" | "networks">> &
   Pick<NftListParams, "q" | "minPrice" | "maxPrice" | "tab">;
 
-// diz se o NFT passa nos filtros
 function matches(nft: DbNft, filters: Filters, skip?: "categories" | "networks"): boolean {
   if (filters.q) {
     const haystack = normalize(`${nft.name} ${nft.tokenId} ${nft.collection} ${nft.category.name}`);
@@ -106,7 +99,6 @@ function matches(nft: DbNft, filters: Filters, skip?: "categories" | "networks")
   return true;
 }
 
-// ordena a lista
 function sortNfts(nfts: DbNft[], sort: NftListParams["sort"]): DbNft[] {
   const sorted = [...nfts];
   switch (sort) {
@@ -121,13 +113,11 @@ function sortNfts(nfts: DbNft[], sort: NftListParams["sort"]): DbNft[] {
   }
 }
 
-// inteiro dentro de um intervalo
 function clampInt(value: number | undefined, fallback: number, min: number, max: number): number {
   if (value === undefined || !Number.isInteger(value)) return fallback;
   return Math.min(max, Math.max(min, value));
 }
 
-// lista filtrada, ordenada e paginada
 export function listNfts(params: NftListParams): NftListResponse {
   const source = getConfig().emptyCatalog ? [] : db().nfts;
   const filters: Filters = {

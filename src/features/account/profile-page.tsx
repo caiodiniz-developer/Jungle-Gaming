@@ -11,7 +11,7 @@ import {
   type ProfileValues,
 } from "@/api/schemas";
 import imageIcon from "@/assets/icons/image.svg";
-import { FormMessage, PasswordField, TextField } from "@/components/form-fields";
+import { EnsField, FormMessage, PasswordField, TextField } from "@/components/form-fields";
 import { Icon } from "@/components/icon";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -24,7 +24,6 @@ import {
 import { useSession } from "@/features/auth/session";
 import { applyApiError } from "@/lib/form-errors";
 
-// lado do avatar, em pixels
 const AVATAR_SIZE = 256;
 
 /** Reduz a imagem para 256×256 (corte central) antes do envio: cabe com folga no limite da API. */
@@ -51,7 +50,6 @@ async function toAvatarDataUrl(file: File): Promise<string> {
   return canvas.toDataURL("image/webp", 0.85);
 }
 
-// campo do avatar: trocar e remover
 function AvatarField({ user }: { user: User }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const errorId = useId();
@@ -142,179 +140,159 @@ function AvatarField({ user }: { user: User }) {
   );
 }
 
-// formulário dos dados do perfil
-function ProfileForm({ user }: { user: User }) {
-  const update = useUpdateProfile();
+const PROFILE_FIELDS = ["displayName", "username", "email", "ensName", "walletAlias"] as const;
+
+const profileValues = (user: User): ProfileValues => ({
+  displayName: user.displayName,
+  username: user.username,
+  email: user.email,
+  ensName: user.ensName,
+  walletAlias: user.walletAlias,
+});
+
+/**
+ * Dados do perfil e troca de senha com um único "Salvar", como no layout.
+ * São duas operações da API: os dados são enviados se mudaram, e a senha, se
+ * algum dos três campos foi preenchido. Cada uma tem seus próprios erros.
+ */
+function ProfileForms({ user }: { user: User }) {
+  const updateProfile = useUpdateProfile();
+  const changePassword = useChangePassword();
   const [formError, setFormError] = useState<string | null>(null);
-  const form = useForm<ProfileValues>({
+
+  const profile = useForm<ProfileValues>({
     resolver: zodResolver(profileSchema),
-    defaultValues: {
-      displayName: user.displayName,
-      username: user.username,
-      email: user.email,
-      ensName: user.ensName,
-      walletAlias: user.walletAlias,
-    },
+    defaultValues: profileValues(user),
   });
-  const { errors, isDirty } = form.formState;
-
-  const submit = form.handleSubmit((values) => {
-    setFormError(null);
-    update.mutate(values, {
-      onSuccess: (saved) => {
-        // os valores confirmados pela API viram o novo ponto de partida do formulário
-        form.reset({
-          displayName: saved.displayName,
-          username: saved.username,
-          email: saved.email,
-          ensName: saved.ensName,
-          walletAlias: saved.walletAlias,
-        });
-        toast.success("Perfil atualizado.");
-      },
-      onError: (error) =>
-        setFormError(
-          applyApiError(error, form.setError, ["displayName", "username", "email", "ensName", "walletAlias"]),
-        ),
-    });
-  });
-
-  return (
-    <form onSubmit={submit} noValidate aria-labelledby="perfil-titulo" className="flex flex-col gap-6">
-      <h1 id="perfil-titulo" className="text-base leading-4 font-bold">
-        Perfil do colecionador
-      </h1>
-      <FormMessage message={formError} />
-      <div className="grid gap-x-7 gap-y-5 md:grid-cols-2">
-        <TextField
-          label="Nome de exibição"
-          required
-          autoComplete="name"
-          error={errors.displayName?.message}
-          {...form.register("displayName")}
-        />
-        <TextField
-          label="Nome de usuário"
-          required
-          autoComplete="username"
-          error={errors.username?.message}
-          {...form.register("username")}
-        />
-        <TextField
-          label="E-mail"
-          required
-          type="email"
-          autoComplete="email"
-          error={errors.email?.message}
-          {...form.register("email")}
-        />
-        {/* o sufixo .eth é fixo (ENS só existe na Ethereum); o campo guarda o nome completo */}
-        <Controller
-          control={form.control}
-          name="ensName"
-          render={({ field }) => (
-            <TextField
-              label="Nome ENS"
-              required
-              leading={
-                <span
-                  aria-hidden="true"
-                  className="flex h-10 w-[78px] shrink-0 items-center rounded-sm border border-border px-2.5 text-[15px]"
-                >
-                  .eth
-                </span>
-              }
-              placeholder="seunome"
-              hint="Sem o sufixo .eth"
-              autoCapitalize="none"
-              spellCheck={false}
-              error={errors.ensName?.message}
-              name={field.name}
-              ref={field.ref}
-              onBlur={field.onBlur}
-              value={field.value.replace(/\.eth$/i, "")}
-              onChange={(event) => {
-                const label = event.target.value.trim().replace(/\.eth$/i, "");
-                field.onChange(label ? `${label}.eth` : "");
-              }}
-            />
-          )}
-        />
-        <TextField
-          label="Apelido da carteira"
-          required
-          error={errors.walletAlias?.message}
-          {...form.register("walletAlias")}
-        />
-        <AvatarField user={user} />
-      </div>
-      <Button type="submit" disabled={update.isPending || !isDirty} className="w-[131px] rounded-sm">
-        {update.isPending ? "Salvando…" : "Salvar"}
-      </Button>
-    </form>
-  );
-}
-
-// formulário de troca de senha
-function PasswordForm() {
-  const change = useChangePassword();
-  const [formError, setFormError] = useState<string | null>(null);
-  const form = useForm<ChangePasswordFormValues>({
+  const password = useForm<ChangePasswordFormValues>({
     resolver: zodResolver(changePasswordFormSchema),
     defaultValues: { currentPassword: "", newPassword: "", confirmPassword: "" },
   });
-  const { errors } = form.formState;
+  const profileErrors = profile.formState.errors;
+  const passwordErrors = password.formState.errors;
 
-  const submit = form.handleSubmit(({ currentPassword, newPassword }) => {
-    setFormError(null);
-    change.mutate(
+  const saveProfile = profile.handleSubmit((values) =>
+    updateProfile.mutate(values, {
+      onSuccess: (saved) => {
+        // os valores confirmados pela API viram o novo ponto de partida do formulário
+        profile.reset(profileValues(saved));
+        toast.success("Perfil atualizado.");
+      },
+      onError: (error) => setFormError(applyApiError(error, profile.setError, PROFILE_FIELDS)),
+    }),
+  );
+
+  const savePassword = password.handleSubmit(({ currentPassword, newPassword }) =>
+    changePassword.mutate(
       { currentPassword, newPassword },
       {
         onSuccess: () => {
-          form.reset();
+          password.reset();
           toast.success("Senha alterada.");
         },
         onError: (error) =>
-          setFormError(applyApiError(error, form.setError, ["currentPassword", "newPassword"])),
+          setFormError(applyApiError(error, password.setError, ["currentPassword", "newPassword"])),
       },
-    );
-  });
+    ),
+  );
+
+  function submit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setFormError(null);
+    const wantsPassword = Object.values(password.getValues()).some((value) => value !== "");
+    // sem senha preenchida, "Salvar" valida e envia os dados do perfil
+    if (profile.formState.isDirty || !wantsPassword) void saveProfile();
+    if (wantsPassword) void savePassword();
+  }
+
+  const saving = updateProfile.isPending || changePassword.isPending;
 
   return (
-    <form onSubmit={submit} noValidate aria-labelledby="senha-titulo" className="flex flex-col gap-5">
-      <h2 id="senha-titulo" className="text-base leading-4 font-medium">
-        Alterar senha
-      </h2>
-      <FormMessage message={formError} />
-      <div className="flex flex-col gap-4 md:max-w-[calc(50%-14px)]">
-        <PasswordField
-          label="Senha atual"
-          autoComplete="current-password"
-          error={errors.currentPassword?.message}
-          {...form.register("currentPassword")}
-        />
-        <PasswordField
-          label="Nova senha"
-          autoComplete="new-password"
-          hint="Ao menos 8 caracteres, com letra e número."
-          error={errors.newPassword?.message}
-          {...form.register("newPassword")}
-        />
-        <PasswordField
-          label="Confirmar nova senha"
-          autoComplete="new-password"
-          error={errors.confirmPassword?.message}
-          {...form.register("confirmPassword")}
-        />
+    <form onSubmit={submit} noValidate aria-labelledby="perfil-titulo" className="flex flex-col gap-8">
+      <div className="flex flex-col gap-6">
+        <h1 id="perfil-titulo" className="text-base leading-4 font-bold">
+          Perfil do colecionador
+        </h1>
+        <FormMessage message={formError} />
+        <div className="grid gap-x-7 gap-y-5 md:grid-cols-2">
+          <TextField
+            label="Nome de exibição"
+            required
+            autoComplete="name"
+            error={profileErrors.displayName?.message}
+            {...profile.register("displayName")}
+          />
+          <TextField
+            label="Nome de usuário"
+            required
+            autoComplete="username"
+            error={profileErrors.username?.message}
+            {...profile.register("username")}
+          />
+          <TextField
+            label="E-mail"
+            required
+            type="email"
+            autoComplete="email"
+            error={profileErrors.email?.message}
+            {...profile.register("email")}
+          />
+          <Controller
+            control={profile.control}
+            name="ensName"
+            render={({ field }) => (
+              <EnsField
+                name={field.name}
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                inputRef={field.ref}
+                error={profileErrors.ensName?.message}
+              />
+            )}
+          />
+          <TextField
+            label="Apelido da carteira"
+            required
+            error={profileErrors.walletAlias?.message}
+            {...profile.register("walletAlias")}
+          />
+          <AvatarField user={user} />
+        </div>
       </div>
-      <Button type="submit" disabled={change.isPending} className="w-fit min-w-[131px] rounded-sm">
-        {change.isPending ? "Alterando…" : "Alterar senha"}
+
+      <fieldset className="flex flex-col gap-5">
+        <legend className="mb-5 text-base leading-4 font-medium">Alterar senha</legend>
+        <div className="flex flex-col gap-4 md:max-w-[calc(50%-14px)]">
+          <PasswordField
+            label="Senha atual"
+            autoComplete="current-password"
+            error={passwordErrors.currentPassword?.message}
+            {...password.register("currentPassword")}
+          />
+          <PasswordField
+            label="Nova senha"
+            autoComplete="new-password"
+            error={passwordErrors.newPassword?.message}
+            {...password.register("newPassword")}
+          />
+          <PasswordField
+            label="Confirmar nova senha"
+            autoComplete="new-password"
+            error={passwordErrors.confirmPassword?.message}
+            {...password.register("confirmPassword")}
+          />
+        </div>
+      </fieldset>
+
+      <Button type="submit" disabled={saving} className="w-[131px] rounded-sm">
+        {saving ? "Salvando…" : "Salvar"}
       </Button>
     </form>
   );
 }
 
-// página Perfil do colecionador
+/** Página "Perfil do colecionador". */
 export function ProfilePage() {
   const { user } = useSession();
 
@@ -332,11 +310,6 @@ export function ProfilePage() {
     );
   }
 
-  return (
-    <div className="flex flex-col gap-10">
-      {/* a chave recria os formulários ao trocar de conta */}
-      <ProfileForm key={user.id} user={user} />
-      <PasswordForm key={`senha-${user.id}`} />
-    </div>
-  );
+  // a chave recria os formulários ao trocar de conta
+  return <ProfileForms key={user.id} user={user} />;
 }

@@ -22,7 +22,6 @@ import { useIsDesktop } from "@/lib/use-media-query";
 import { cn } from "@/lib/utils";
 import { FlashOnChange } from "@/components/flash-on-change";
 
-// nota em estrelas
 function Rating({ rating, compact = false }: { rating: NftDetail["rating"]; compact?: boolean }) {
   const average = rating.average.toFixed(1).replace(".", ",");
   const label = `Nota ${average} de 5, ${rating.count} avaliações de colecionadores`;
@@ -36,7 +35,7 @@ function Rating({ rating, compact = false }: { rating: NftDetail["rating"]; comp
       >
         <Icon src={starIcon} className="size-3 text-amber" />
         <span aria-hidden="true" className="font-medium">
-          {average}
+          {rating.average.toFixed(1)}
         </span>
         <span aria-hidden="true" className="text-sand">
           ({rating.count})
@@ -62,7 +61,6 @@ function Rating({ rating, compact = false }: { rating: NftDetail["rating"]; comp
   );
 }
 
-// tela de detalhes do NFT (desktop e mobile)
 export function NftDetailView({ nft }: { nft: NftDetail }) {
   const navigate = useNavigate();
   const router = useRouter();
@@ -139,7 +137,8 @@ export function NftDetailView({ nft }: { nft: NftDetail }) {
           );
         })}
       </div>
-      <p className={cn("text-xs leading-4", canBuy ? "text-sand" : "text-coral")} aria-live="polite">
+      {/* com a edição disponível, o limite por pedido fica só para leitores de tela (o layout não tem esta linha) */}
+      <p className={cn("text-xs leading-4", canBuy ? "sr-only" : "text-coral")} aria-live="polite">
         {availabilityText}
       </p>
     </fieldset>

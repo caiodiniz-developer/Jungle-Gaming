@@ -3,23 +3,14 @@ import { useState } from "react";
 import { Controller, type Resolver, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type { Wallet, WalletKind } from "@/api/contracts";
-import { NETWORK_LABELS, WALLET_PROVIDER_LABELS } from "@/api/contracts";
 import { walletSchema, type WalletValues } from "@/api/schemas";
-import { FormMessage, SelectField, TextField } from "@/components/form-fields";
+import { EnsField, FormMessage, SelectField, TextField } from "@/components/form-fields";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSaveWallet, useWallets } from "@/features/account/use-account";
 import { applyApiError } from "@/lib/form-errors";
+import { NETWORK_OPTIONS, PROVIDER_OPTIONS } from "@/lib/options";
 
-// opções do select de rede
-const NETWORK_OPTIONS = Object.entries(NETWORK_LABELS).map(([value, label]) => ({ value, label }));
-// opções do select de tipo de carteira
-const PROVIDER_OPTIONS = Object.entries(WALLET_PROVIDER_LABELS).map(([value, label]) => ({
-  value,
-  label,
-}));
-
-// campos que podem receber erro da API
 const FIELDS = [
   "displayName",
   "alias",
@@ -40,7 +31,6 @@ type WalletFormValues = Omit<WalletValues, "network" | "provider"> & {
   provider: WalletValues["provider"] | "";
 };
 
-// valores iniciais do formulário
 function toFormValues(kind: WalletKind, source?: Wallet | null): WalletFormValues {
   return {
     kind,
@@ -66,7 +56,6 @@ type WalletFormProps = {
   onSaved?: () => void;
 };
 
-// formulário de uma carteira
 function WalletForm({ kind, wallet, template, onSaved }: WalletFormProps) {
   const save = useSaveWallet();
   const [formError, setFormError] = useState<string | null>(null);
@@ -172,29 +161,13 @@ function WalletForm({ kind, wallet, template, onSaved }: WalletFormProps) {
           control={form.control}
           name="ensName"
           render={({ field }) => (
-            <TextField
-              label="Nome ENS"
-              required
-              leading={
-                <span
-                  aria-hidden="true"
-                  className="flex h-10 w-[78px] shrink-0 items-center rounded-sm border border-border px-2.5 text-[15px]"
-                >
-                  .eth
-                </span>
-              }
-              placeholder="seunome"
-              autoCapitalize="none"
-              spellCheck={false}
-              error={errors.ensName?.message}
+            <EnsField
               name={field.name}
-              ref={field.ref}
+              value={field.value}
+              onChange={field.onChange}
               onBlur={field.onBlur}
-              value={field.value.replace(/\.eth$/i, "")}
-              onChange={(event) => {
-                const ensLabel = event.target.value.trim().replace(/\.eth$/i, "");
-                field.onChange(ensLabel ? `${ensLabel}.eth` : "");
-              }}
+              inputRef={field.ref}
+              error={errors.ensName?.message}
             />
           )}
         />
@@ -206,7 +179,6 @@ function WalletForm({ kind, wallet, template, onSaved }: WalletFormProps) {
   );
 }
 
-// página Carteiras (principal e secundária)
 export function WalletsPage() {
   const { data: wallets, isPending, isError, error, refetch } = useWallets();
   const [addingPrimary, setAddingPrimary] = useState(false);

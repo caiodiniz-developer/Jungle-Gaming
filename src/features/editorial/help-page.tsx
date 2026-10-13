@@ -1,6 +1,5 @@
 import { Link } from "@tanstack/react-router";
 
-// tópicos da central de ajuda
 const TOPICS = [
   {
     id: "como-comprar",
@@ -35,7 +34,6 @@ const TOPICS = [
   },
 ];
 
-// página Central de ajuda
 export function HelpPage() {
   return (
     <div className="container-page flex flex-col gap-10 pt-8 pb-16 lg:pb-24">

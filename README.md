@@ -30,6 +30,7 @@ A entrega roda a partir de um checkout limpo, sem serviço externo.
 | `pnpm preview` | Serve o build (porta 4173) |
 | `pnpm typecheck` | Verificação de tipos |
 | `pnpm lint` | ESLint |
+| `pnpm test` | Testes unitários (Vitest) |
 | `pnpm test:e2e` | Testes Playwright (faz o build e sobe o preview sozinho) |
 | `pnpm test:e2e:update` | Regera as baselines da regressão visual |
 | `pnpm test:e2e:report` | Abre o relatório HTML da última execução |
@@ -111,9 +112,26 @@ Em todos, comece com `?reset-mocks&cenario=<id>` e, quando precisar de login, us
 ## Testes
 
 ```bash
+pnpm test                                # unitários
 pnpm exec playwright install chromium   # uma vez
-pnpm test:e2e
+pnpm test:e2e                            # ponta a ponta
 ```
+
+### Unitários
+
+60 testes da lógica pura, sem navegador, ao lado do código que testam (`src/**/*.test.ts`):
+
+| Arquivo | Cobre |
+| --- | --- |
+| `lib/eth.test.ts` | Aritmética de ETH em wei, sem perda de precisão, e formatação |
+| `realtime/events.test.ts` | Descarte de eventos duplicados e de versões antigas, por recurso |
+| `features/checkout/order-attempt.test.ts` | Quando a chave de idempotência é reusada e quando muda |
+| `features/catalog/search.test.ts` | Estado do catálogo na URL e conversão para o contrato REST |
+| `features/auth/guards.test.ts` | Destino pós-login (sem redirecionamento aberto) e rotas privadas |
+| `mocks/domain/pricing.test.ts` | Cotação da API simulada: cupom, taxa por rede, indisponibilidade, hash; fusão do carrinho do visitante |
+| `mocks/config.test.ts` | Determinismo dos cenários: latência com semente, falhas com limite de ocorrências |
+
+### Ponta a ponta
 
 75 testes em Chromium: 66 no viewport desktop (1440 × 900) e 9 no mobile (390 × 844). Cada teste usa um contexto novo do navegador, portanto parte do banco simulado no estado inicial. Os arquivos em [tests/](tests/) seguem os itens do enunciado:
 
@@ -137,6 +155,10 @@ Os testes de tempo real só alteram o banco simulado ou derrubam conexões: o ev
 O relatório HTML fica em `playwright-report/`; falhas guardam trace e screenshot em `test-results/`.
 
 **Regressão visual:** as baselines versionadas em `tests/visual.spec.ts-snapshots/` foram geradas no Windows (sufixo `-win32`). Em outro sistema operacional a renderização de fontes difere e o Playwright pede baselines próprias: rode `pnpm test:e2e:update` uma vez.
+
+## Integração contínua
+
+O workflow [.github/workflows/ci.yml](.github/workflows/ci.yml) roda a cada push e pull request: tipos, lint, testes unitários e build, e depois os testes E2E no Linux. O relatório do Playwright e os traces ficam como artefatos da execução. A regressão visual não entra no CI (as baselines versionadas são do Windows); o job manual `baselines-linux` gera as do Linux.
 
 ## Auditoria Lighthouse
 
@@ -166,13 +188,15 @@ Em Netlify ou Cloudflare Pages, o equivalente é: comando `pnpm build`, pasta `d
 ```
 src/
   api/          contratos (tipos), schemas zod e uma função por operação REST
+                (os testes unitários ficam ao lado do código: *.test.ts)
   lib/          Axios, variáveis de ambiente, aritmética de ETH, chaves de cache
   realtime/     socket.io-client, filtro de eventos e sincronização com o cache
   features/     catálogo, detalhe, favoritos, carrinho, checkout, pedidos, conta, sessão
   components/   layout (header, rodapé, barra mobile), campos de formulário, shadcn/ui
   routes/       rotas por arquivo (TanStack Router)
   mocks/        MSW: handlers, regras de negócio, banco simulado, cenários, Socket.IO
-tests/          Playwright
+tests/          Playwright (E2E e regressão visual)
+.github/        integração contínua
 scripts/        auditoria Lighthouse
 docs/           relatórios do Lighthouse
 ```

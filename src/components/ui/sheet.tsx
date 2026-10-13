@@ -3,33 +3,28 @@ import { cn } from "@/lib/utils"
 import { XIcon } from "lucide-react"
 import { Dialog as SheetPrimitive } from "radix-ui"
 
-// componente painel lateral
 function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
   return <SheetPrimitive.Root data-slot="sheet" {...props} />
 }
 
-// painel lateral: elemento que abre
 function SheetTrigger({
   ...props
 }: React.ComponentProps<typeof SheetPrimitive.Trigger>) {
   return <SheetPrimitive.Trigger data-slot="sheet-trigger" {...props} />
 }
 
-// painel lateral: elemento que fecha
 function SheetClose({
   ...props
 }: React.ComponentProps<typeof SheetPrimitive.Close>) {
   return <SheetPrimitive.Close data-slot="sheet-close" {...props} />
 }
 
-// painel lateral: renderiza fora da árvore, no fim da página
 function SheetPortal({
   ...props
 }: React.ComponentProps<typeof SheetPrimitive.Portal>) {
   return <SheetPrimitive.Portal data-slot="sheet-portal" {...props} />
 }
 
-// painel lateral: fundo escurecido
 function SheetOverlay({
   className,
   ...props
@@ -46,7 +41,6 @@ function SheetOverlay({
   )
 }
 
-// painel lateral: conteúdo
 function SheetContent({
   className,
   children,
@@ -88,7 +82,6 @@ function SheetContent({
   )
 }
 
-// painel lateral: cabeçalho
 function SheetHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -99,7 +92,6 @@ function SheetHeader({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
-// painel lateral: rodapé
 function SheetFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -110,7 +102,6 @@ function SheetFooter({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
-// painel lateral: título
 function SheetTitle({
   className,
   ...props
@@ -124,7 +115,6 @@ function SheetTitle({
   )
 }
 
-// painel lateral: descrição
 function SheetDescription({
   className,
   ...props

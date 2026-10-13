@@ -4,7 +4,6 @@ import { cn } from "@/lib/utils"
 import { CircleIcon } from "lucide-react"
 import { RadioGroup as RadioGroupPrimitive } from "radix-ui"
 
-// componente grupo de rádios
 function RadioGroup({
   className,
   ...props
@@ -18,7 +17,6 @@ function RadioGroup({
   )
 }
 
-// grupo de rádios: um rádio
 function RadioGroupItem({
   className,
   ...props

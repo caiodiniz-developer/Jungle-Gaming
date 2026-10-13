@@ -17,12 +17,9 @@ type FiltersProps = {
 
 /** O slider trabalha em centésimos de ETH (inteiros); a URL recebe a string decimal. */
 const toCents = (value: string) => Math.round(Number(value) * 100);
-// centésimos → string decimal
 const fromCents = (cents: number) => (cents / 100).toFixed(2);
-// centésimos → texto com vírgula
 const display = (cents: number) => fromCents(cents).replace(".", ",");
 
-// grupo de filtros com caixas de seleção
 function FacetGroup({
   title,
   facets,
@@ -49,7 +46,7 @@ function FacetGroup({
               <li key={facet.id}>
                 <label
                   className={cn(
-                    "relative flex cursor-pointer items-center justify-between text-[15px] leading-10 transition-colors hover:text-highlight",
+                    "relative flex cursor-pointer items-center justify-between text-[15px] leading-10 transition-colors hover:text-highlight has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring",
                     checked ? "text-highlight" : "text-sand",
                   )}
                 >
@@ -61,16 +58,15 @@ function FacetGroup({
                       checked={checked}
                       onChange={() => onToggle(facet.id)}
                     />
-                    {/* a marca de seleção indica o estado sem depender só da cor */}
-                    <span
-                      aria-hidden="true"
-                      className={cn(
-                        "flex size-4 items-center justify-center rounded-[3px] border peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ring",
-                        checked ? "border-primary bg-primary text-ink" : "border-border-soft",
-                      )}
-                    >
-                      {checked && <CheckIcon className="size-3" strokeWidth={3} />}
-                    </span>
+                    {/* marcado: além da cor do layout, um sinal de visto (o estado não depende só da cor) */}
+                    {checked && (
+                      <span
+                        aria-hidden="true"
+                        className="flex size-4 items-center justify-center rounded-[3px] bg-primary text-ink"
+                      >
+                        <CheckIcon className="size-3" strokeWidth={3} />
+                      </span>
+                    )}
                     {facet.name}
                   </span>
                   <span className="font-bold tabular-nums">({facet.count})</span>
@@ -90,7 +86,6 @@ function FacetGroup({
   );
 }
 
-// filtro de faixa de preço
 function PriceFilter({ search, facets, onChange }: Omit<FiltersProps, "className">) {
   const headingId = useId();
   const floor = facets ? toCents(facets.priceRange.min) : 0;

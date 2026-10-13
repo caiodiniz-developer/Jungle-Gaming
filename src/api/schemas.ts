@@ -5,22 +5,17 @@
  */
 import { z } from "zod";
 
-// redes aceitas
 const NETWORKS = ["ethereum", "polygon", "solana"] as const;
-// tipos de carteira aceitos
 const PROVIDERS = ["metamask", "walletconnect", "coinbase"] as const;
 
-// campo de texto obrigatório
 const required = (label: string) => z.string().trim().min(1, `Informe ${label}.`);
 
-// validação de e-mail
 export const emailSchema = z
   .string()
   .trim()
   .min(1, "Informe o e-mail.")
   .pipe(z.email("Informe um e-mail válido."));
 
-// validação do nome de usuário
 export const usernameSchema = z
   .string()
   .trim()
@@ -28,21 +23,18 @@ export const usernameSchema = z
   .max(20, "O nome de usuário deve ter no máximo 20 caracteres.")
   .regex(/^[a-zA-Z0-9_.]+$/, "Use apenas letras, números, ponto e sublinhado.");
 
-// validação de senha (8+ caracteres, letra e número)
 export const passwordSchema = z
   .string()
   .min(8, "A senha deve ter ao menos 8 caracteres.")
   .regex(/[a-zA-Z]/, "A senha deve conter ao menos uma letra.")
   .regex(/\d/, "A senha deve conter ao menos um número.");
 
-// validação do nome ENS (termina em .eth)
 export const ensNameSchema = z
   .string()
   .trim()
   .toLowerCase()
   .regex(/^[a-z0-9-]+(\.[a-z0-9-]+)*\.eth$/, "Informe um nome ENS válido, como nome.eth.");
 
-// validação do endereço 0x da carteira
 export const walletAddressSchema = z
   .string()
   .trim()
@@ -55,14 +47,12 @@ export const loginSchema = z.object({
   password: z.string().min(1, "Informe a senha."),
 });
 
-// corpo do cadastro
 export const registerSchema = z.object({
   username: usernameSchema,
   email: emailSchema,
   password: passwordSchema,
 });
 
-// formulário de cadastro (inclui confirmar senha)
 export const registerFormSchema = registerSchema
   .extend({ confirmPassword: z.string().min(1, "Confirme a senha.") })
   .refine((data) => data.password === data.confirmPassword, {
@@ -80,13 +70,11 @@ export const profileSchema = z.object({
   walletAlias: required("o apelido da carteira").max(30, "Use no máximo 30 caracteres."),
 });
 
-// corpo da troca de senha
 export const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, "Informe a senha atual."),
   newPassword: passwordSchema,
 });
 
-// formulário de troca de senha (inclui confirmação)
 export const changePasswordFormSchema = changePasswordSchema
   .extend({ confirmPassword: z.string().min(1, "Confirme a nova senha.") })
   .refine((data) => data.newPassword === data.confirmPassword, {
@@ -101,7 +89,6 @@ export const changePasswordFormSchema = changePasswordSchema
 /** Limite do avatar: ~200 KB de imagem (data URL em base64 ocupa ~4/3 disso). */
 export const AVATAR_MAX_BYTES = 200 * 1024;
 
-// validação do avatar (tipo e tamanho)
 export const avatarSchema = z.object({
   dataUrl: z
     .string()
@@ -135,7 +122,6 @@ export const walletSchema = z.object({
   ensName: ensNameSchema,
 });
 
-// corpo do pedido de conexão da carteira
 export const connectWalletSchema = z.object({
   provider: z.enum(PROVIDERS, "Selecione uma carteira."),
   network: z.enum(NETWORKS, "Selecione uma rede."),
@@ -149,12 +135,10 @@ export const addCartItemSchema = z.object({
   quantity: z.number().int("A quantidade deve ser inteira.").min(1, "A quantidade mínima é 1."),
 });
 
-// corpo da alteração de quantidade
 export const updateCartItemSchema = z.object({
   quantity: z.number().int("A quantidade deve ser inteira.").min(1, "A quantidade mínima é 1."),
 });
 
-// validação do código promocional
 export const couponSchema = z.object({
   code: z
     .string()
@@ -164,7 +148,6 @@ export const couponSchema = z.object({
     .max(20, "O código deve ter no máximo 20 caracteres."),
 });
 
-// dados do colecionador no pagamento
 export const collectorSchema = z.object({
   displayName: required("o nome de exibição").max(40, "Use no máximo 40 caracteres."),
   username: usernameSchema,
@@ -178,7 +161,6 @@ export const collectorSchema = z.object({
   note: z.string().trim().max(280, "Use no máximo 280 caracteres."),
 });
 
-// corpo da criação do pedido
 export const createOrderSchema = z.object({
   quoteHash: z.string().min(1),
   walletId: z.string().min(1, "Selecione uma carteira."),

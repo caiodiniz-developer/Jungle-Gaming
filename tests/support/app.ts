@@ -86,13 +86,18 @@ export class App {
     return this.page.getByTestId("quote-total");
   }
 
+  /** Total do pagamento: no resumo (desktop) ou na barra inferior (mobile). */
+  checkoutTotal(): Locator {
+    return this.page.getByTestId(this.isMobile ? "checkout-total" : "quote-total");
+  }
+
   /** Do carrinho (visitante) até o pagamento, opcionalmente com a carteira conectada. */
   async goToCheckout({ connect = true, user = USERS.collector as Credentials } = {}) {
     await this.page.getByRole("button", { name: "Conectar e finalizar" }).click();
     await this.page.waitForURL(/\/entrar/);
     await this.login(user);
     await this.page.waitForURL(/\/pagamento/);
-    await expect(this.quoteTotal()).toBeVisible();
+    await expect(this.checkoutTotal()).toContainText("ETH");
     if (connect) await this.connectWallet();
   }
 

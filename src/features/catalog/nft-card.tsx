@@ -20,11 +20,9 @@ type NftCardProps = {
   className?: string;
 };
 
-// estilo dos botões de ação do card
 const actionButton =
   "flex size-[35px] items-center justify-center rounded-sm bg-ink text-foreground transition-colors hover:text-highlight disabled:cursor-not-allowed disabled:opacity-50";
 
-// card de um NFT
 export function NftCard({ nft, priority = false, compact = false, className }: NftCardProps) {
   const addToCart = useAddToCart();
 
@@ -136,7 +134,6 @@ export function NftCard({ nft, priority = false, compact = false, className }: N
   );
 }
 
-// placeholder do card enquanto carrega
 export function NftCardSkeleton({ compact = false }: { compact?: boolean }) {
   return (
     <div className="flex flex-col gap-2 lg:gap-3" aria-hidden="true">

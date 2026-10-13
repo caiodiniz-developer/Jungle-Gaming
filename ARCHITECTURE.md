@@ -28,6 +28,18 @@ src/realtime/* ── socket.io-client ──►  WebSocket ┘
 | `src/routes/` | Rotas por arquivo; só ligam URL, guarda e componente |
 | `src/mocks/` | Handlers, regras de negócio (`domain/`), fixtures, cenários e servidor Socket.IO simulado |
 
+O pagamento, a tela com mais estado, é dividido assim (`src/features/checkout/`):
+
+| Arquivo | Responsabilidade |
+| --- | --- |
+| `checkout-page.tsx` | Espera sessão, carteiras e carrinho; decide entre carregando, erro, vazio e formulário |
+| `checkout-form.tsx` | Compõe a tela e liga os três estados abaixo |
+| `use-quote-review.ts` | Qual cotação o usuário já revisou; detecta mudança em tempo real |
+| `use-wallet-connection.ts` | Conexão simulada da carteira (conectar, recusar, desconectar) |
+| `use-order-submission.ts` | Envio do pedido e a recuperação de cada código de erro |
+| `order-attempt.ts` | Chave de idempotência da tentativa |
+| `collector-fields.tsx`, `wallet-picker.tsx`, `provider-options.tsx`, `order-review.tsx` | Partes visuais, sem regra de negócio |
+
 ## 2. Contratos REST
 
 Prefixo `/api`. Corpo e respostas em JSON. A fonte dos tipos é [src/api/contracts.ts](src/api/contracts.ts).
@@ -172,7 +184,18 @@ O servidor de eventos é um handler de WebSocket do MSW com `@mswjs/socket.io-bi
 - **Um navegador por vez:** o banco e o servidor de eventos vivem na aba. Cada aba carrega sua cópia do banco ao abrir e não troca eventos com as outras.
 - **Outros WebSockets** da mesma origem (como o HMR do Vite) são repassados ao servidor real.
 
-## 8. Decisões de UX
+## 8. Testes e integração contínua
+
+| Nível | Ferramenta | O que cobre |
+| --- | --- | --- |
+| Unitário | Vitest (`src/**/*.test.ts`) | Lógica pura, sem navegador: aritmética de ETH, filtro de eventos duplicados e antigos, chave de idempotência, estado do catálogo na URL, destino pós-login, cotação e fusão de carrinho da API simulada, determinismo dos cenários |
+| E2E | Playwright (`tests/`) | Fluxos de tela com REST e Socket.IO simulados, em desktop e mobile, e regressão visual |
+
+A divisão segue um critério: regra que cabe numa função sem DOM é testada no nível unitário, onde o teste roda em milissegundos e aponta a linha que quebrou; o que depende de navegação, rede e tempo real é testado de ponta a ponta.
+
+O workflow [.github/workflows/ci.yml](.github/workflows/ci.yml) roda a cada push e pull request: tipos, lint, testes unitários e build; depois os testes E2E em Chromium no Linux, com o relatório HTML e os traces como artefatos. A regressão visual não roda no CI porque as baselines versionadas são do Windows; um job manual gera as do Linux.
+
+## 9. Decisões de UX
 
 - **Confirmação só com resposta da simulação:** o pedido nasce `pending`; a tela de confirmação e o link do explorador só aparecem quando o estado vira `confirmed`. Confirmado e recusado são terminais.
 - **Timeout no envio:** o aviso oferece "Tentar novamente", que reenvia exatamente o mesmo corpo. Se o pedido já tinha sido criado, ele é recuperado.
@@ -181,7 +204,7 @@ O servidor de eventos é um handler de WebSocket do MSW com `@mswjs/socket.io-bi
 - **Ações sem função real** não simulam sucesso: newsletter, login social e "esqueceu a senha" avisam que estão indisponíveis.
 - **Animações:** uma única curva de movimento, entradas curtas, destaque de valores alterados. Com `prefers-reduced-motion`, o conteúdo aparece no lugar, sem animação.
 
-## 9. Acessibilidade
+## 10. Acessibilidade
 
 - Navegação por teclado com foco visível em todos os controles; link "Pular para o conteúdo".
 - Diálogos e painéis (login, zoom da galeria, filtros no mobile) prendem o foco e o devolvem ao fechar (Radix, via shadcn/ui).
@@ -193,28 +216,30 @@ Ajustes em relação ao layout, feitos por acessibilidade:
 
 | Ajuste | Motivo |
 | --- | --- |
-| Filtros com caixa de seleção visível | O estado marcado não pode depender só da cor do texto |
+| Filtro marcado ganha um sinal de visto, além da cor do layout | O estado marcado não pode depender só da cor do texto |
 | Edição esgotada com borda tracejada, texto riscado e "(esgotada)" no nome acessível | Idem; a versão com opacidade não atingia contraste de 4,5:1 |
+| Limite por pedido da edição só para leitores de tela enquanto a edição está disponível | O layout não tem essa linha; ela aparece quando a edição esgota |
 | Campos nativos invisíveis cobrindo o controle desenhado (filtros, edições, carteiras) | Clique, foco e leitores de tela agem no campo real |
-| Paginação com "anterior" e reticências | O catálogo tem 27 páginas; o layout mostra só 4 |
 
-## 10. Desvios do Figma
+## 11. Desvios do Figma
 
 | Tela | Desvio | Motivo |
 | --- | --- | --- |
 | Header | Com sessão, "Entrar" vira o menu da conta | O layout mostra "Entrar" até nas telas que exigem login |
 | Header, rodapé e menu da conta | Itens sem frame (Criadores, Aprenda, ajuda, Atividade, Lista de interesse, Ofertas, Arquivos baixados, Suporte) são links para páginas simples no mesmo padrão visual | O enunciado as coloca fora da entrega; em vez de texto morto, levam a conteúdo coerente. "Ofertas" declara que não há ofertas nesta versão |
 | Início | Hero com três destaques alternados pelos pontos | Os pontos do layout sugerem um carrossel |
-| Detalhe | Miniaturas com enquadramentos diferentes da mesma arte | O arquivo usa a mesma imagem nas quatro; assim a galeria tem função |
-| Detalhe | Linha de disponibilidade sob as edições | Mostra o limite por pedido e a edição esgotada |
+| Início | Paginação com "anterior", reticências e última página | O catálogo tem 27 páginas; o layout mostra só 4 |
+| Detalhe | As quatro miniaturas mostram a mesma arte, como no layout, mas cada uma leva a imagem principal a um enquadramento diferente | Dá função à galeria sem mudar a aparência |
 | Detalhe | Rótulos "Direitos autorais" e "Contrato" na ordem do conteúdo | No arquivo os dois rótulos estão trocados em relação ao texto |
-| Detalhe mobile | Miniaturas no lugar dos pontos; descrição e relacionados abaixo das informações | Sem frame para essas partes |
+| Detalhe mobile | Tocar na imagem abre a versão ampliada; descrição e relacionados abaixo das informações | O frame mobile não tem botão de zoom nem essas seções |
 | Carrinho | Linha mostra também a edição; avisos de indisponibilidade; cupom aplicado vira texto com "Remover cupom" | Estados exigidos pelo enunciado e não desenhados |
-| Pagamento | "Endereço da carteira", "Tipo de carteira" e "Usar outra carteira?" viraram a escolha entre as carteiras cadastradas, com "Conectar carteira" e "Desconectar" | O enunciado pede o uso das carteiras cadastradas e a simulação de conexão, recusa e desconexão |
-| Pagamento mobile | Mesma estrutura do desktop, empilhada | O frame mobile mostra só carteiras, provedor e total; o pedido exige os dados do colecionador |
-| Confirmação | Cartão na página, com header e rodapé; estados pendente e recusado | No layout é um modal sobre fundo vazio e só há o estado confirmado |
-| Perfil | "Salvar" (dados) e "Alterar senha" são formulários separados | São operações distintas da API, com erros próprios |
-| Carteiras | "Igual à carteira principal" é uma caixa de seleção que pré-preenche o formulário | No layout é um rádio isolado |
+| Pagamento | "Endereço da carteira" e "ENS ou carteira secundária" mostram os dados da carteira cadastrada, sem edição; "Usar outra carteira?" alterna entre a principal e a secundária | O enunciado pede o uso das carteiras cadastradas |
+| Pagamento | Botão "Conectar carteira" e, depois de conectada, o estado com "Desconectar" | Simulação de conexão, recusa e desconexão, pedida pelo enunciado |
+| Pagamento | A primeira opção de "Carteira e rede" é "WalletConnect" | No frame desktop essa linha mostra o selo com as três carteiras; o frame mobile lista WalletConnect, MetaMask e Coinbase Wallet |
+| Pagamento mobile | Dados do colecionador e itens num bloco recolhível, abaixo das carteiras | O frame mobile não os mostra, mas o pedido exige esses dados; o bloco abre sozinho se houver erro neles |
+| Confirmação | Estados pendente e recusado no mesmo modal; no mobile, cartão em página inteira | O layout só desenha o confirmado, no desktop |
+| Perfil | Um único "Salvar", como no layout, que envia os dados do perfil e, se preenchida, a troca de senha | São duas operações da API, cada uma com seus erros |
+| Carteiras | "Igual à carteira principal" é uma caixa de seleção que pré-preenche o formulário; "Adicionar" some quando a carteira já existe | No layout é um rádio isolado, ao lado de um formulário vazio |
 | Perfil, carteiras e confirmação no mobile | Sem frame: seguem o padrão das telas mobile existentes | Pedido pelo enunciado |
 
 ### Inconsistências do próprio arquivo
@@ -230,11 +255,12 @@ Ajustes em relação ao layout, feitos por acessibilidade:
 - As quatro artes do arquivo foram convertidas para WebP em 96, 256, 512 e 900 px (`public/nfts/`) e são servidas com `srcset`.
 - Os ícones são os SVGs exportados do Figma (`src/assets/icons/`). O ícone "THANK YOU" do recibo foi redesenhado em SVG a partir do frame, porque o original não pôde ser exportado. O fundo decorativo do banner mobile é o mesmo desenho, embutido como SVG.
 
-## 11. Limitações
+## 12. Limitações
 
 - **Performance no perfil mobile do Lighthouse fica em 82–83**, abaixo da meta de 90. Causas e tentativas em [docs/lighthouse/ANALISE.md](docs/lighthouse/ANALISE.md).
 - Não há backend: os dados vivem no navegador de quem acessa. Limpar os dados do site ou usar `?reset-mocks` volta ao estado inicial.
 - O estado da conexão da carteira fica na tela de pagamento; ao recarregar, é preciso conectar de novo.
+- O endereço da carteira no pagamento não é editável ali: muda-se na tela de carteiras.
 - As baselines da regressão visual são específicas do sistema operacional (as versionadas são do Windows).
 - "Ofertas" não tem funcionalidade; Criadores, Aprenda e a central de ajuda têm conteúdo estático.
 - As redes sociais do rodapé apontam para a página inicial de cada rede, por não existir perfil da marca.

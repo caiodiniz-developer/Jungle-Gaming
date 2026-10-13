@@ -8,7 +8,6 @@ import type { User, Wallet } from "@/api/contracts";
 import { buildNftFixtures } from "@/mocks/fixtures/nfts";
 import type { Db, DbUser } from "@/mocks/types";
 
-// chave no localStorage
 const STORAGE_KEY = "kurio.mock.db";
 /** Incrementar ao mudar o formato das fixtures: descarta estados gravados incompatíveis. */
 const SCHEMA_VERSION = 2;
@@ -33,12 +32,10 @@ export const DEMO_USERS = [
   },
 ] as const;
 
-// data fixa das fixtures
 const SEED_TIMESTAMP = "2026-07-29T12:00:00.000Z";
 
 let state: Db | null = null;
 
-// banco simulado atual
 export function db(): Db {
   if (!state) throw new Error("O banco simulado ainda não foi iniciado (initDb).");
   return state;
@@ -54,23 +51,19 @@ export function commit() {
   }
 }
 
-// bytes → hexadecimal
 function toHex(buffer: ArrayBuffer): string {
   return Array.from(new Uint8Array(buffer), (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
-// hexadecimal aleatório
 export function randomHex(bytes: number): string {
   return toHex(crypto.getRandomValues(new Uint8Array(bytes)).buffer);
 }
 
-// hash da senha com salt
 export async function hashPassword(password: string, salt: string): Promise<string> {
   const data = new TextEncoder().encode(`${salt}:${password}`);
   return toHex(await crypto.subtle.digest("SHA-256", data));
 }
 
-// usuário sem os campos internos
 export function toPublicUser(user: DbUser): User {
   return {
     id: user.id,
@@ -83,7 +76,6 @@ export function toPublicUser(user: DbUser): User {
   };
 }
 
-// cria o estado inicial
 async function seed(): Promise<Db> {
   const users: DbUser[] = [];
   for (const [index, demo] of DEMO_USERS.entries()) {
@@ -179,7 +171,6 @@ export async function resetDb(): Promise<Db> {
   return state;
 }
 
-// próximo id sequencial
 export function nextId(kind: keyof Db["counters"], prefix: string): string {
   const current = db();
   current.counters[kind] += 1;

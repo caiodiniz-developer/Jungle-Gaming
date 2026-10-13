@@ -3,7 +3,6 @@ import { z } from "zod";
 import { AuthScreen } from "@/features/auth/auth-screen";
 import { redirectIfSignedIn } from "@/features/auth/guards";
 
-// rota /cadastro
 export const Route = createFileRoute("/cadastro")({
   // destino após autenticar: volta ao fluxo em que o usuário estava
   validateSearch: z.object({ redirect: z.string().optional().catch(undefined) }),

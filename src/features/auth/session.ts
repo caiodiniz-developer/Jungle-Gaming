@@ -33,7 +33,6 @@ function startSession(queryClient: QueryClient, session: Session) {
   queryClient.setQueryData(queryKeys.session(session.token), session);
 }
 
-// encerra a sessão local e limpa os dados privados
 export function endSession(queryClient: QueryClient) {
   setSessionToken(null);
   clearPrivateData(queryClient);
@@ -73,7 +72,6 @@ export function useUpdateCachedUser() {
   };
 }
 
-// login
 export function useLogin() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -83,7 +81,6 @@ export function useLogin() {
   });
 }
 
-// cadastro
 export function useRegister() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -93,7 +90,6 @@ export function useRegister() {
   });
 }
 
-// logout
 export function useLogout() {
   const queryClient = useQueryClient();
   return useMutation({

@@ -9,7 +9,6 @@ import { SessionWatcher } from "@/features/auth/session-watcher";
 import { cn } from "@/lib/utils";
 import type { RouterContext } from "@/router";
 
-// rota raiz: moldura comum a todas as telas
 export const Route = createRootRouteWithContext<RouterContext>()({
   component: RootLayout,
   notFoundComponent: () => <NotFound />,

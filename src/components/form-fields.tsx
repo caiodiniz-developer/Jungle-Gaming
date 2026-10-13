@@ -5,7 +5,6 @@ import eyeOffIcon from "@/assets/icons/eye-off.svg";
 import { Icon } from "@/components/icon";
 import { cn } from "@/lib/utils";
 
-// estilo comum de input e select
 const controlClass =
   "h-10 w-full min-w-0 rounded-sm border border-input bg-transparent px-3 text-sm text-foreground transition-colors outline-none placeholder:text-subtle focus-visible:border-primary focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive";
 
@@ -53,7 +52,6 @@ function FieldShell({ id, label, required, hideLabel, error, hint, className, ch
   );
 }
 
-// id do texto (erro ou dica) que descreve o campo
 function describedBy(id: string, error?: string, hint?: string) {
   if (error) return `${id}-error`;
   if (hint) return `${id}-hint`;
@@ -70,7 +68,6 @@ type TextFieldProps = CommonProps &
     leading?: React.ReactNode;
   };
 
-// campo de texto com rótulo e erro
 export function TextField({
   label,
   required,
@@ -166,7 +163,6 @@ type SelectFieldProps = CommonProps &
     options: { value: string; label: string }[];
   };
 
-// campo de seleção com rótulo e erro
 export function SelectField({
   label,
   required,
@@ -214,6 +210,49 @@ export function SelectField({
         />
       </div>
     </FieldShell>
+  );
+}
+
+type EnsFieldProps = {
+  name: string;
+  /** Nome completo, com ".eth" (é o que o formulário guarda). */
+  value: string;
+  onChange: (value: string) => void;
+  onBlur: () => void;
+  inputRef: React.Ref<HTMLInputElement>;
+  error?: string;
+};
+
+/**
+ * Nome ENS como no layout: o sufixo ".eth" fica numa caixa ao lado e o usuário
+ * digita só o nome. O sufixo é fixo porque ENS só existe na Ethereum.
+ */
+export function EnsField({ name, value, onChange, onBlur, inputRef, error }: EnsFieldProps) {
+  return (
+    <TextField
+      label="Nome ENS"
+      required
+      leading={
+        <span
+          aria-hidden="true"
+          className="flex h-10 w-[78px] shrink-0 items-center justify-between rounded-sm border border-border px-2.5 text-[15px]"
+        >
+          .eth
+          <Icon src={chevronDownIcon} className="size-[18px] text-subtle" />
+        </span>
+      }
+      autoCapitalize="none"
+      spellCheck={false}
+      error={error}
+      name={name}
+      ref={inputRef}
+      onBlur={onBlur}
+      value={value.replace(/\.eth$/i, "")}
+      onChange={(event) => {
+        const label = event.target.value.trim().replace(/\.eth$/i, "");
+        onChange(label ? `${label}.eth` : "");
+      }}
+    />
   );
 }
 

@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { LoaderCircleIcon } from "lucide-react";
 import type { Order } from "@/api/contracts";
 import { NETWORK_LABELS, WALLET_PROVIDER_LABELS } from "@/api/contracts";
@@ -8,12 +8,18 @@ import { Icon } from "@/components/icon";
 import { NftImage } from "@/components/nft-image";
 import { NotFound } from "@/components/not-found";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useOrder } from "@/features/orders/use-order";
 import { formatEthLabel, isZeroEth, shortenHash } from "@/lib/eth";
+import { useIsDesktop } from "@/lib/use-media-query";
 
-// formato da data do pedido
-const dateFormat = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
+/** Data como no layout: "29 Jul, 2026". */
+function formatDate(iso: string): string {
+  const date = new Date(iso);
+  const month = new Intl.DateTimeFormat("pt-BR", { month: "short" }).format(date).replace(".", "");
+  return `${String(date.getDate()).padStart(2, "0")} ${month.charAt(0).toUpperCase()}${month.slice(1)}, ${date.getFullYear()}`;
+}
 
 /** Ícone "THANK YOU" do recibo, redesenhado a partir do PNG do layout (o original não foi exportado). */
 function ThankYouIcon() {
@@ -58,7 +64,6 @@ function ThankYouIcon() {
   );
 }
 
-// topo do recibo conforme o estado do pedido
 function StatusHeader({ order }: { order: Order }) {
   if (order.status === "confirmed") {
     return (
@@ -92,13 +97,12 @@ function StatusHeader({ order }: { order: Order }) {
   );
 }
 
-// recibo do pedido
 function OrderReceipt({ order }: { order: Order }) {
   const facts = [
     order.transaction
       ? { label: "ID da transação", value: shortenHash(order.transaction.hash), title: order.transaction.hash }
       : { label: "Pedido", value: order.id },
-    { label: "Data", value: dateFormat.format(new Date(order.createdAt)) },
+    { label: "Data", value: formatDate(order.createdAt) },
     { label: "Total", value: formatEthLabel(order.total) },
     { label: "Carteira", value: WALLET_PROVIDER_LABELS[order.wallet.provider] },
   ];
@@ -225,13 +229,33 @@ function OrderReceipt({ order }: { order: Order }) {
   );
 }
 
-// página do pedido: carregando, recibo ou erro
 export function OrderPage({ orderId }: { orderId: string }) {
   const { data: order, isPending, error, refetch } = useOrder(orderId);
+  const isDesktop = useIsDesktop();
+  const navigate = useNavigate();
+
+  if (order && isDesktop) {
+    // desktop: o recibo é um modal sobre a página, como no layout; fechar leva ao início
+    return (
+      <>
+        <div aria-hidden="true" className="min-h-[60vh]" />
+        <Dialog open onOpenChange={(open) => !open && void navigate({ to: "/" })}>
+          <DialogContent
+            showCloseButton={false}
+            className="max-h-[94vh] w-[578px] max-w-[578px] gap-0 overflow-y-auto rounded-none border-0 bg-transparent p-0 sm:max-w-[578px]"
+          >
+            <DialogTitle className="sr-only">Pedido {order.id}</DialogTitle>
+            <DialogDescription className="sr-only">Resultado e detalhes da compra.</DialogDescription>
+            <OrderReceipt order={order} />
+          </DialogContent>
+        </Dialog>
+      </>
+    );
+  }
 
   if (order) {
     return (
-      <div className="container-page py-8 lg:py-16">
+      <div className="container-page py-8">
         <OrderReceipt order={order} />
       </div>
     );

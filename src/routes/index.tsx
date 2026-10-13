@@ -28,7 +28,6 @@ import {
 import { nftListOptions, useNftList } from "@/features/catalog/use-nfts";
 import { useDebouncedValue } from "@/lib/use-debounced-value";
 
-// rota /
 export const Route = createFileRoute("/")({
   // busca, filtros, ordenação e página vivem na URL: sobrevivem a refresh e ao histórico
   validateSearch: catalogSearchSchema,
@@ -40,7 +39,6 @@ export const Route = createFileRoute("/")({
   component: HomePage,
 });
 
-// busca do topo no mobile
 function MobileSearch({ value, onCommit }: { value: string; onCommit: (value: string) => void }) {
   const [text, setText] = useState(value);
   const debounced = useDebouncedValue(text, 350);
@@ -76,7 +74,6 @@ function MobileSearch({ value, onCommit }: { value: string; onCommit: (value: st
   );
 }
 
-// página inicial: hero, catálogo, promoções e blog
 function HomePage() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();

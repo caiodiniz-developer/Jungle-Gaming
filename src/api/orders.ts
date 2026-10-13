@@ -17,13 +17,11 @@ export async function createOrder(
   return data;
 }
 
-// busca um pedido pelo id
 export async function getOrder(orderId: string, options?: RequestOptions) {
   const { data } = await http.get<Order>(`/orders/${encodeURIComponent(orderId)}`, options);
   return data;
 }
 
-// lista os pedidos do usuário
 export async function listOrders(options?: RequestOptions) {
   const { data } = await http.get<OrderListResponse>("/orders", options);
   return data;

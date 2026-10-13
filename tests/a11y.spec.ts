@@ -127,7 +127,7 @@ test.describe("Acessibilidade e responsividade", () => {
       await app.addToCart("nft-0009");
       await expectNoHorizontalOverflow(page);
       await app.open("/pagamento");
-      await expect(app.quoteTotal()).toBeVisible();
+      await expect(page.getByRole("button", { name: "Conectar carteira" })).toBeVisible();
       await expectNoHorizontalOverflow(page);
     });
   }

@@ -19,10 +19,8 @@ import { useSessionKey } from "@/lib/use-session-token";
  * cliques, então uma resposta atrasada nunca sobrescreve uma mais recente.
  */
 const CART_MUTATION_KEY = ["cart-mutation"] as const;
-// fila única das alterações do carrinho
 const CART_SCOPE = { id: "cart" } as const;
 
-// carrinho atual
 export function useCart() {
   const sessionKey = useSessionKey();
   return useQuery({
@@ -67,7 +65,6 @@ function useCartSync() {
   };
 }
 
-// adicionar ao carrinho
 export function useAddToCart() {
   const sync = useCartSync();
   return useMutation({
@@ -124,7 +121,6 @@ export function useUpdateCartItem() {
   });
 }
 
-// remover linha (otimista, com rollback)
 export function useRemoveCartItem() {
   const sync = useCartSync();
   return useMutation({
@@ -147,7 +143,6 @@ export function useRemoveCartItem() {
   });
 }
 
-// aplicar cupom
 export function useApplyCoupon() {
   const sync = useCartSync();
   return useMutation({
@@ -158,7 +153,6 @@ export function useApplyCoupon() {
   });
 }
 
-// remover cupom
 export function useRemoveCoupon() {
   const sync = useCartSync();
   return useMutation({

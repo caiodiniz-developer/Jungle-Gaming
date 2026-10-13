@@ -4,7 +4,6 @@ import { getNft, listNfts } from "@/api/nfts";
 import { queryKeys } from "@/lib/query-keys";
 import { eventGate } from "@/realtime/gate";
 
-// consulta da lista de NFTs
 export function nftListOptions(params: NftListParams) {
   return queryOptions({
     queryKey: queryKeys.nfts.list(params),
@@ -17,7 +16,6 @@ export function nftListOptions(params: NftListParams) {
   });
 }
 
-// consulta do detalhe de um NFT
 export function nftDetailOptions(nftId: string) {
   return queryOptions({
     queryKey: queryKeys.nfts.detail(nftId),
@@ -29,7 +27,6 @@ export function nftDetailOptions(nftId: string) {
   });
 }
 
-// lista de NFTs
 export function useNftList(params: NftListParams) {
   return useQuery({
     ...nftListOptions(params),
@@ -38,7 +35,6 @@ export function useNftList(params: NftListParams) {
   });
 }
 
-// detalhe de um NFT
 export function useNftDetail(nftId: string) {
   return useQuery(nftDetailOptions(nftId));
 }

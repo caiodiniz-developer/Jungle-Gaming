@@ -7,10 +7,8 @@ import { mergeGuestCart } from "@/mocks/domain/pricing";
 import { authenticate, fail, json, noContent, readBody, route } from "@/mocks/http";
 import type { DbUser } from "@/mocks/types";
 
-// campo opcional com o carrinho do visitante
 const guestCart = { guestCartId: z.string().optional() };
 
-// abre uma sessão para o usuário
 function openSession(user: DbUser): Session {
   const current = db();
   const expiresAt = Date.now() + getConfig().sessionTtlMs;
@@ -20,7 +18,6 @@ function openSession(user: DbUser): Session {
   return { token, expiresAt: new Date(expiresAt).toISOString(), user: toPublicUser(user) };
 }
 
-// rotas de cadastro, login, sessão e logout
 export const authHandlers = [
   route("post", "/auth/register", async ({ request }) => {
     const body = await readBody(request, registerSchema.extend(guestCart));

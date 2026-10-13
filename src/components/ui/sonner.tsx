@@ -7,7 +7,6 @@ import {
 } from "lucide-react"
 import { Toaster as Sonner, type ToasterProps } from "sonner"
 
-// componente dos avisos (toasts)
 const Toaster = ({ ...props }: ToasterProps) => {
   return (
     <Sonner

@@ -9,14 +9,12 @@ import {
 import { useOrders } from "@/features/orders/use-order";
 import { formatEthLabel } from "@/lib/eth";
 
-// texto de cada estado do pedido
 const STATUS_LABELS: Record<OrderStatus, string> = {
   pending: "Pendente",
   confirmed: "Confirmado",
   rejected: "Recusado",
 };
 
-// formato da data do pedido
 const dateFormat = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
 
 /** Atividade: os pedidos da conta, cada um com link para o recibo. */

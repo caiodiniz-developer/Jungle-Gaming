@@ -11,7 +11,6 @@ import { getConfig } from "@/mocks/config";
 import { commit, db, hashPassword, nextId, randomHex, toPublicUser } from "@/mocks/db";
 import { fail, json, noContent, readBody, requireUser, route } from "@/mocks/http";
 
-// carteiras de um usuário
 function walletsOf(userId: string): Wallet[] {
   const wallets = db().wallets;
   wallets[userId] ??= [];
@@ -45,7 +44,6 @@ function findOwnWallet(userId: string, walletId: string): Wallet {
   return fail(404, "NOT_FOUND", "Carteira não encontrada.");
 }
 
-// rotas de perfil e carteiras
 export const accountHandlers = [
   // ───────────── Perfil ─────────────
 

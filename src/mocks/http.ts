@@ -22,7 +22,6 @@ export class MockError extends Error {
   }
 }
 
-// interrompe o handler com um erro da API
 export function fail(
   status: number,
   code: ApiErrorCode,
@@ -32,23 +31,19 @@ export function fail(
   throw new MockError(status, { code, message, ...extra });
 }
 
-// resposta JSON
 export function json<T>(body: T, status = 200) {
   return HttpResponse.json(body as Parameters<typeof HttpResponse.json>[0], { status });
 }
 
-// resposta 204
 export function noContent() {
   return new HttpResponse(null, { status: 204 });
 }
 
-// mensagens das falhas injetadas
 const FAULT_MESSAGES: Partial<Record<ApiErrorCode, string>> = {
   INTERNAL_ERROR: "Erro interno do servidor. Tente novamente.",
   SERVICE_UNAVAILABLE: "Serviço temporariamente indisponível. Tente novamente em instantes.",
 };
 
-// resposta de uma falha injetada
 async function faultResponse(fault: FaultRule) {
   if (fault.kind === "network") return HttpResponse.error();
   if (fault.kind === "timeout") {
@@ -73,7 +68,6 @@ type RouteContext = {
 
 type Resolver = (context: RouteContext) => Promise<Response> | Response;
 
-// prefixo das rotas da API
 const apiPrefix = new URL(env.apiUrl, window.location.origin).pathname.replace(/\/$/, "");
 
 /**
@@ -128,7 +122,6 @@ export async function readBody<Schema extends z.ZodType>(
   return fail(422, "VALIDATION_ERROR", "Revise os campos destacados.", { fields });
 }
 
-// token do cabeçalho Authorization
 function bearerToken(request: Request): string | null {
   const header = request.headers.get("Authorization");
   return header?.startsWith("Bearer ") ? header.slice("Bearer ".length) : null;
@@ -156,7 +149,6 @@ export function authenticate(request: Request): Authenticated | null {
   return { user, session };
 }
 
-// exige usuário autenticado
 export function requireUser(request: Request): DbUser {
   const auth = authenticate(request);
   if (!auth) fail(401, "UNAUTHENTICATED", "Entre na sua conta para continuar.");

@@ -46,17 +46,14 @@ export class ApiError extends Error {
   }
 }
 
-// diz se o erro é um ApiError
 export function isApiError(error: unknown): error is ApiError {
   return error instanceof ApiError;
 }
 
-// confere o formato do corpo de erro da API
 function isErrorBody(data: unknown): data is ApiErrorBody {
   return typeof data === "object" && data !== null && "code" in data && "message" in data;
 }
 
-// converte qualquer falha em ApiError
 export function toApiError(error: unknown): ApiError {
   if (error instanceof ApiError) return error;
 
@@ -105,7 +102,6 @@ export function setSessionExpiredHandler(handler: SessionExpiredHandler | null) 
   onSessionExpired = handler;
 }
 
-// cliente Axios da aplicação
 export const http = axios.create({
   baseURL: env.apiUrl,
   // o adaptador fetch implementa o timeout com temporizador + AbortSignal,

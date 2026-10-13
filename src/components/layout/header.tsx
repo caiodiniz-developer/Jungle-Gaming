@@ -21,7 +21,6 @@ type Section = "inicio" | "mercado" | "criadores" | "aprenda";
 /** Telas do fluxo de compra destacam "Mercado"; as demais destacam "Início" (regra do Figma). */
 const MARKET_PATHS = ["/nft", "/carrinho", "/pagamento", "/pedidos"];
 
-// descobre qual item do menu está ativo
 function useActiveSection(): Section {
   const { pathname, hash } = useRouterState({ select: (state) => state.location });
   // "Mercado" leva ao catálogo da página inicial: lá, o item ativo acompanha a âncora
@@ -31,7 +30,6 @@ function useActiveSection(): Section {
   return MARKET_PATHS.some((path) => pathname.startsWith(path)) ? "mercado" : "inicio";
 }
 
-// item do menu principal
 function NavItem({
   active,
   children,
@@ -113,7 +111,6 @@ function HeaderSearch() {
   );
 }
 
-// estilo do botão "Entrar" / menu da conta
 const accountButton =
   "flex h-[35px] items-center justify-center gap-1 rounded-md bg-primary text-base font-medium text-ink transition-colors hover:bg-highlight";
 
@@ -178,7 +175,6 @@ function AccountControl() {
   );
 }
 
-// cabeçalho do site (desktop)
 export function Header() {
   const section = useActiveSection();
   // a linha sob o header existe só nas telas em que "Início" está ativo
