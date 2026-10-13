@@ -7,6 +7,7 @@ type SliderProps = React.ComponentProps<typeof SliderPrimitive.Root> & {
   thumbLabels?: string[]
 }
 
+// componente controle deslizante
 function Slider({ className, value, defaultValue, thumbLabels = [], ...props }: SliderProps) {
   const thumbs = value ?? defaultValue ?? [0]
 

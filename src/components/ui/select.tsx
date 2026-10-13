@@ -4,24 +4,28 @@ import { cn } from "@/lib/utils"
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react"
 import { Select as SelectPrimitive } from "radix-ui"
 
+// componente seletor
 function Select({
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Root>) {
   return <SelectPrimitive.Root data-slot="select" {...props} />
 }
 
+// seletor: grupo de itens
 function SelectGroup({
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Group>) {
   return <SelectPrimitive.Group data-slot="select-group" {...props} />
 }
 
+// seletor: valor selecionado
 function SelectValue({
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Value>) {
   return <SelectPrimitive.Value data-slot="select-value" {...props} />
 }
 
+// seletor: elemento que abre
 function SelectTrigger({
   className,
   size = "default",
@@ -48,6 +52,7 @@ function SelectTrigger({
   )
 }
 
+// seletor: conteúdo
 function SelectContent({
   className,
   children,
@@ -85,6 +90,7 @@ function SelectContent({
   )
 }
 
+// seletor: rótulo
 function SelectLabel({
   className,
   ...props
@@ -98,6 +104,7 @@ function SelectLabel({
   )
 }
 
+// seletor: item
 function SelectItem({
   className,
   children,
@@ -125,6 +132,7 @@ function SelectItem({
   )
 }
 
+// seletor: linha separadora
 function SelectSeparator({
   className,
   ...props
@@ -138,6 +146,7 @@ function SelectSeparator({
   )
 }
 
+// seletor: botão de rolar para cima
 function SelectScrollUpButton({
   className,
   ...props
@@ -156,6 +165,7 @@ function SelectScrollUpButton({
   )
 }
 
+// seletor: botão de rolar para baixo
 function SelectScrollDownButton({
   className,
   ...props

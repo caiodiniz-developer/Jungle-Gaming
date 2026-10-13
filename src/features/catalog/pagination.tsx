@@ -24,6 +24,7 @@ function pageWindow(page: number, totalPages: number): (number | "gap")[] {
   return result;
 }
 
+// estilo de cada botão da paginação
 const box =
   "flex size-[35px] items-center justify-center rounded-[4px] border border-border text-lg leading-4 transition-colors";
 

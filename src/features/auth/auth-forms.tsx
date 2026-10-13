@@ -24,6 +24,7 @@ import { applyApiError } from "@/lib/form-errors";
 
 /** Campos do layout de autenticação: mais altos e arredondados no mobile. */
 const authInput = "h-[50px] rounded-[10px] px-4 lg:h-10 lg:rounded-[5px]";
+// estilo do botão de envio
 const submitButton = "h-[60px] w-full rounded-[10px] text-base lg:h-[45px] lg:rounded-[5px]";
 
 /** O logo do Google vem do Figma em sete partes posicionadas por porcentagem. */
@@ -80,6 +81,7 @@ type AuthFormProps = {
   submitLabel: string;
 };
 
+// formulário de login
 export function LoginForm({ onSuccess, submitLabel }: AuthFormProps) {
   const login = useLogin();
   const [formError, setFormError] = useState<string | null>(null);
@@ -140,6 +142,7 @@ export function LoginForm({ onSuccess, submitLabel }: AuthFormProps) {
   );
 }
 
+// formulário de cadastro
 export function RegisterForm({ onSuccess, submitLabel }: AuthFormProps) {
   const register = useRegister();
   const [formError, setFormError] = useState<string | null>(null);
@@ -214,6 +217,7 @@ export function RegisterForm({ onSuccess, submitLabel }: AuthFormProps) {
   );
 }
 
+// link para alternar entre entrar e criar conta (mobile)
 export function AuthSwitchLink({ mode, redirect }: { mode: "login" | "register"; redirect?: string }) {
   return (
     <p className="text-center text-[15px] text-sand">

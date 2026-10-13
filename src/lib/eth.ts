@@ -7,18 +7,22 @@
  */
 
 const DECIMALS = 18;
+// 1 ETH em wei
 const UNIT = 10n ** BigInt(DECIMALS);
+// formato de número decimal
 const DECIMAL_PATTERN = /^-?\d+(\.\d+)?$/;
 
 /** Valor em ETH como string decimal, ex.: "26.846". */
 export type EthAmount = string;
 
+// valida uma string de valor em ETH
 export function isEthAmount(value: string): boolean {
   if (!DECIMAL_PATTERN.test(value)) return false;
   const fraction = value.split(".")[1];
   return fraction === undefined || fraction.length <= DECIMALS;
 }
 
+// ETH (string) → wei (bigint)
 export function toWei(value: EthAmount): bigint {
   if (!isEthAmount(value)) throw new Error(`Valor em ETH inválido: "${value}"`);
   const negative = value.startsWith("-");
@@ -36,14 +40,17 @@ export function fromWei(wei: bigint): EthAmount {
   return `${negative ? "-" : ""}${whole}${fraction ? `.${fraction}` : ""}`;
 }
 
+// soma
 export function addEth(...values: EthAmount[]): EthAmount {
   return fromWei(values.reduce((total, value) => total + toWei(value), 0n));
 }
 
+// subtração
 export function subtractEth(a: EthAmount, b: EthAmount): EthAmount {
   return fromWei(toWei(a) - toWei(b));
 }
 
+// valor × quantidade inteira
 export function multiplyEth(value: EthAmount, quantity: number): EthAmount {
   if (!Number.isInteger(quantity)) throw new Error("A quantidade deve ser um número inteiro");
   return fromWei(toWei(value) * BigInt(quantity));
@@ -55,11 +62,13 @@ export function percentOfEth(value: EthAmount, percent: number): EthAmount {
   return fromWei((toWei(value) * BigInt(percent)) / 100n);
 }
 
+// compara dois valores
 export function compareEth(a: EthAmount, b: EthAmount): -1 | 0 | 1 {
   const diff = toWei(a) - toWei(b);
   return diff === 0n ? 0 : diff < 0n ? -1 : 1;
 }
 
+// diz se o valor é zero
 export function isZeroEth(value: EthAmount): boolean {
   return toWei(value) === 0n;
 }
@@ -74,6 +83,7 @@ export function formatEth(value: EthAmount, { minDecimals = 2, maxDecimals = 6 }
   return `${whole}.${trimmed.padEnd(minDecimals, "0")}`;
 }
 
+// valor formatado com "ETH"
 export function formatEthLabel(value: EthAmount): string {
   return `${formatEth(value)} ETH`;
 }

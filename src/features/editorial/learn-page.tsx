@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Blog } from "@/features/catalog/home-sections";
 
+// página Aprenda
 export function LearnPage() {
   return (
     <div className="flex flex-col gap-12 pt-8 pb-16 lg:gap-16 lg:pb-24">

@@ -4,6 +4,7 @@ import { db } from "@/mocks/db";
 import { createOrder, toPublicOrder } from "@/mocks/domain/orders";
 import { fail, json, readBody, requireUser, route } from "@/mocks/http";
 
+// rotas de pedidos
 export const orderHandlers = [
   route("post", "/orders", async ({ request }) => {
     const user = requireUser(request);

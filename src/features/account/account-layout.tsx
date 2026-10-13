@@ -11,6 +11,7 @@ import { Icon } from "@/components/icon";
 import { useLogout } from "@/features/auth/session";
 import { cn } from "@/lib/utils";
 
+// itens do menu da conta
 const LINKS = [
   { to: "/conta/perfil", label: "Dados do perfil", icon: userIcon },
   { to: "/conta/carteiras", label: "Carteiras", icon: locationIcon },
@@ -21,8 +22,10 @@ const LINKS = [
   { to: "/conta/suporte", label: "Suporte", icon: dangerIcon },
 ] as const;
 
+// estilo de cada linha do menu
 const row = "flex items-center gap-3 border-l-[6px] border-transparent px-4 text-[15px] leading-[45px]";
 
+// moldura da área da conta: menu lateral + conteúdo
 export function AccountLayout({ children }: { children: React.ReactNode }) {
   const logout = useLogout();
   const navigate = useNavigate();

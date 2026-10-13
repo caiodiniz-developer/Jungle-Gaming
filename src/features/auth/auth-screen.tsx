@@ -19,6 +19,7 @@ type AuthScreenProps = {
   redirect?: string;
 };
 
+// textos de cada modo (entrar / criar conta)
 const COPY = {
   login: {
     title: "Entrar",

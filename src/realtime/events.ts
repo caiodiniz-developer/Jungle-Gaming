@@ -2,6 +2,7 @@ import type { RealtimeEnvelope, RealtimeEventType } from "@/api/contracts";
 
 type AnyEnvelope = RealtimeEnvelope<RealtimeEventType, unknown>;
 
+// quantos ids de evento são lembrados
 const MAX_REMEMBERED_IDS = 500;
 
 /**

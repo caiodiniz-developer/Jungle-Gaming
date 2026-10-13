@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useOrder } from "@/features/orders/use-order";
 import { formatEthLabel, isZeroEth, shortenHash } from "@/lib/eth";
 
+// formato da data do pedido
 const dateFormat = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
 
 /** Ícone "THANK YOU" do recibo, redesenhado a partir do PNG do layout (o original não foi exportado). */
@@ -57,6 +58,7 @@ function ThankYouIcon() {
   );
 }
 
+// topo do recibo conforme o estado do pedido
 function StatusHeader({ order }: { order: Order }) {
   if (order.status === "confirmed") {
     return (
@@ -90,6 +92,7 @@ function StatusHeader({ order }: { order: Order }) {
   );
 }
 
+// recibo do pedido
 function OrderReceipt({ order }: { order: Order }) {
   const facts = [
     order.transaction
@@ -222,6 +225,7 @@ function OrderReceipt({ order }: { order: Order }) {
   );
 }
 
+// página do pedido: carregando, recibo ou erro
 export function OrderPage({ orderId }: { orderId: string }) {
   const { data: order, isPending, error, refetch } = useOrder(orderId);
 

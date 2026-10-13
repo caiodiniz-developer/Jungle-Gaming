@@ -9,12 +9,14 @@ import { NftImage } from "@/components/nft-image";
 import { cn } from "@/lib/utils";
 import { Reveal } from "@/components/reveal";
 
+// destaques do hero
 const HERO_SLIDES: { nftId: string; name: string; artwork: Artwork }[] = [
   { nftId: "nft-0042", name: "Emerald Ape #042", artwork: "emerald-ape" },
   { nftId: "nft-0009", name: "Sage Nomad #009", artwork: "sage-nomad" },
   { nftId: "nft-0207", name: "Golden Beat #207", artwork: "golden-beat" },
 ];
 
+// pontos que trocam o destaque
 function SlideDots({
   active,
   onSelect,
@@ -48,6 +50,7 @@ function SlideDots({
   );
 }
 
+// banner principal da página inicial
 export function Hero() {
   const [active, setActive] = useState(0);
   // a troca de destaque faz fade; a primeira imagem aparece direto (é o maior elemento da página)
@@ -159,6 +162,7 @@ export function Hero() {
   );
 }
 
+// banner "NFT em destaque"
 export function FeaturedBanner() {
   return (
     <aside
@@ -199,6 +203,7 @@ const PROMOS: {
   },
 ];
 
+// os dois cards de promoção
 export function Promos() {
   return (
     <section aria-label="Promoções" className="container-page grid gap-7 lg:grid-cols-2">
@@ -245,6 +250,7 @@ export function Promos() {
   );
 }
 
+// posts do blog
 const POSTS: { date: string; read: string; title: string; text: string; artwork: Artwork }[] = [
   {
     date: "12 de setembro",

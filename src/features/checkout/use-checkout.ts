@@ -15,6 +15,7 @@ export function useConnectWallet() {
   });
 }
 
+// desconecta a carteira
 export function useDisconnectWallet() {
   return useMutation({ mutationFn: (walletId: string) => disconnectWallet(walletId) });
 }

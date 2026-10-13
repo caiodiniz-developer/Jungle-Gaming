@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
+// título de uma seção da conta
 export function SectionTitle({ children, description }: { children: React.ReactNode; description?: string }) {
   return (
     <div className="flex flex-col gap-2">
@@ -11,6 +12,7 @@ export function SectionTitle({ children, description }: { children: React.ReactN
   );
 }
 
+// estado de carregamento
 export function SectionLoading({ label }: { label: string }) {
   return (
     <div role="status" aria-label={label} className="flex flex-col gap-3">
@@ -21,6 +23,7 @@ export function SectionLoading({ label }: { label: string }) {
   );
 }
 
+// estado de erro, com nova tentativa
 export function SectionError({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
     <div role="alert" className="flex flex-col items-start gap-4">

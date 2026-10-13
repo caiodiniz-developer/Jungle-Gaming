@@ -23,6 +23,7 @@ type CatalogGridProps = {
 const gridClass =
   "grid grid-cols-2 gap-x-4 gap-y-6 max-md:pb-8 max-md:[&>*:nth-child(even)]:translate-y-8 md:grid-cols-3 md:gap-y-10 lg:gap-x-[34px] lg:gap-y-[72px]";
 
+// caixa de mensagem (vazio ou erro)
 function Message({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="flex min-h-[300px] flex-col items-center justify-center gap-4 bg-surface px-6 py-12 text-center">
@@ -32,6 +33,7 @@ function Message({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
+// grade de NFTs: carregando, erro, vazio ou lista
 export function CatalogGrid({ data, error, isLoading, isRefreshing, filtered, onRetry }: CatalogGridProps) {
   if (isLoading) {
     return (

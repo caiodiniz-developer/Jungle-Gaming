@@ -6,6 +6,7 @@ import { addFavorite, getFavorites, removeFavorite } from "@/api/favorites";
 import { queryKeys } from "@/lib/query-keys";
 import { useSessionKey, useSessionToken } from "@/lib/use-session-token";
 
+// favoritos do usuário
 export function useFavorites() {
   const token = useSessionToken();
   const sessionKey = useSessionKey();

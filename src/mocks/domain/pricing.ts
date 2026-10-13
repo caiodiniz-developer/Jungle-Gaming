@@ -27,6 +27,7 @@ export const NETWORK_FEES: Record<Network, string> = {
   solana: "0.001",
 };
 
+// carrinho do dono (cria se não existir)
 export function getCart(ownerKey: string): DbCart {
   const carts = db().carts;
   carts[ownerKey] ??= {
@@ -38,6 +39,7 @@ export function getCart(ownerKey: string): DbCart {
   return carts[ownerKey];
 }
 
+// marca o carrinho como alterado e grava
 export function touchCart(cart: DbCart) {
   cart.updatedAt = new Date().toISOString();
   commit();
@@ -71,6 +73,7 @@ function buildLines(cart: DbCart): CartLine[] {
   return lines;
 }
 
+// carrinho do banco → carrinho da API
 export function toCartView(cart: DbCart): Cart {
   const lines = buildLines(cart);
   return {
@@ -138,6 +141,7 @@ export function buildQuote(cart: DbCart, network: Network = "ethereum"): Quote {
   return quote;
 }
 
+// guarda a cotação para comparar depois
 function rememberQuote(quote: Quote) {
   const quotes = db().quotes;
   quotes[quote.hash] = quote;

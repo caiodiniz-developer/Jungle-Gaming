@@ -24,6 +24,7 @@ import {
 import { useSession } from "@/features/auth/session";
 import { applyApiError } from "@/lib/form-errors";
 
+// lado do avatar, em pixels
 const AVATAR_SIZE = 256;
 
 /** Reduz a imagem para 256×256 (corte central) antes do envio: cabe com folga no limite da API. */
@@ -50,6 +51,7 @@ async function toAvatarDataUrl(file: File): Promise<string> {
   return canvas.toDataURL("image/webp", 0.85);
 }
 
+// campo do avatar: trocar e remover
 function AvatarField({ user }: { user: User }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const errorId = useId();
@@ -140,6 +142,7 @@ function AvatarField({ user }: { user: User }) {
   );
 }
 
+// formulário dos dados do perfil
 function ProfileForm({ user }: { user: User }) {
   const update = useUpdateProfile();
   const [formError, setFormError] = useState<string | null>(null);
@@ -252,6 +255,7 @@ function ProfileForm({ user }: { user: User }) {
   );
 }
 
+// formulário de troca de senha
 function PasswordForm() {
   const change = useChangePassword();
   const [formError, setFormError] = useState<string | null>(null);
@@ -310,6 +314,7 @@ function PasswordForm() {
   );
 }
 
+// página Perfil do colecionador
 export function ProfilePage() {
   const { user } = useSession();
 

@@ -27,6 +27,7 @@ type GalleryProps = {
   name: string;
 };
 
+// galeria do NFT: miniaturas, imagem principal e zoom
 export function Gallery({ artwork, name }: GalleryProps) {
   const [active, setActive] = useState(0);
   const view = VIEWS[active] ?? VIEWS[0];

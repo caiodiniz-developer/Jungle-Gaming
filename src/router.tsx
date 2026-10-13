@@ -6,6 +6,7 @@ export type RouterContext = {
   queryClient: QueryClient;
 };
 
+// cria o roteador da aplicação
 export function createAppRouter(context: RouterContext) {
   return createRouter({
     routeTree,

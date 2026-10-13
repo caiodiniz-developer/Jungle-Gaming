@@ -3,6 +3,7 @@ import "./styles.css";
 
 import { env } from "@/lib/env";
 
+// inicia os mocks e depois a aplicação
 async function bootstrap() {
   const rootElement = document.getElementById("root");
   if (!rootElement) throw new Error("Elemento #root não encontrado em index.html");

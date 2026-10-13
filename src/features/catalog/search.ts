@@ -27,16 +27,20 @@ export const catalogSearchSchema = z.object({
 
 export type CatalogSearch = z.infer<typeof catalogSearchSchema>;
 
+// redes aceitas no filtro
 const NETWORKS: Network[] = ["ethereum", "polygon", "solana"];
 
+// "a,b" → ["a", "b"]
 export function parseList(value: string | undefined): string[] {
   return value ? value.split(",").map((item) => item.trim()).filter(Boolean) : [];
 }
 
+// ["a", "b"] → "a,b"
 export function formatList(values: string[]): string | undefined {
   return values.length > 0 ? [...values].sort().join(",") : undefined;
 }
 
+// opções de ordenação
 export const SORT_OPTIONS: { value: NftSort; label: string }[] = [
   { value: "recentes", label: "Listados recentemente" },
   { value: "preco-asc", label: "Menor preço" },
@@ -44,6 +48,7 @@ export const SORT_OPTIONS: { value: NftSort; label: string }[] = [
   { value: "nome", label: "Nome (A–Z)" },
 ];
 
+// abas do catálogo
 export const TAB_OPTIONS: { value: NftTab; label: string }[] = [
   { value: "todos", label: "Todos os NFTs" },
   { value: "novos", label: "Novos lançamentos" },
@@ -67,6 +72,7 @@ export function toListParams(search: CatalogSearch): NftListParams {
   return params;
 }
 
+// diz se há busca ou filtro aplicado
 export function hasActiveFilters(search: CatalogSearch): boolean {
   return Boolean(search.q || search.colecoes || search.redes || search.min || search.max || search.aba);
 }

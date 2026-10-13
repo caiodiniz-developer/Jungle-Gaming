@@ -28,6 +28,7 @@ import {
   restoreConnections,
 } from "@/mocks/realtime";
 
+// controles da simulação
 export const mockControl = {
   scenarios: SCENARIOS,
   getConfig,

@@ -33,6 +33,7 @@ import { FlashOnChange } from "@/components/flash-on-change";
 /** Colunas da tabela desktop: imagem, NFT, preço, edições, total, remover. */
 const COLUMNS = "lg:grid-cols-[70px_minmax(0,1fr)_100px_100px_110px_24px] lg:gap-x-4 lg:pr-4";
 
+// uma linha do carrinho
 function CartLineRow({ line }: { line: CartLine }) {
   const update = useUpdateCartItem();
   const remove = useRemoveCartItem();
@@ -139,6 +140,7 @@ function CartLineRow({ line }: { line: CartLine }) {
 
 type CouponValues = z.input<typeof couponSchema>;
 
+// campo do código promocional
 function CouponForm({ cart }: { cart: Cart }) {
   const apply = useApplyCoupon();
   const remove = useRemoveCoupon();
@@ -218,6 +220,7 @@ function CouponForm({ cart }: { cart: Cart }) {
   );
 }
 
+// carrossel "Colecionadores também viram"
 function Suggestions({ cart }: { cart: Cart }) {
   const { data } = useNftList({ tab: "em-alta", pageSize: 12 });
   const inCart = new Set(cart.lines.map((line) => line.nftId));
@@ -225,6 +228,7 @@ function Suggestions({ cart }: { cart: Cart }) {
   return <RelatedCarousel title="Colecionadores também viram" nfts={nfts} />;
 }
 
+// carrinho vazio
 function EmptyCart() {
   return (
     <div className="flex flex-col items-start gap-4 py-10">
@@ -241,6 +245,7 @@ function EmptyCart() {
   );
 }
 
+// página do carrinho
 export function CartPage() {
   const isDesktop = useIsDesktop();
   const navigate = useNavigate();

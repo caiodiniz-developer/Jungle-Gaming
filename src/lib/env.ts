@@ -1,5 +1,7 @@
+// variáveis de ambiente do Vite
 const raw = import.meta.env;
 
+// configuração da aplicação
 export const env = {
   /** Prefixo das rotas REST. */
   apiUrl: raw.VITE_API_URL ?? "/api",

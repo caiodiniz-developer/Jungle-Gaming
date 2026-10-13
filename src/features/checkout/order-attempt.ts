@@ -15,6 +15,7 @@ const STORAGE_KEY = "kurio.checkout.attempt";
 
 type StoredAttempt = { key: string; body: string };
 
+// lê a tentativa guardada
 function read(): StoredAttempt | null {
   try {
     const raw = window.sessionStorage.getItem(STORAGE_KEY);
@@ -28,6 +29,7 @@ function read(): StoredAttempt | null {
   }
 }
 
+// chave de idempotência para este corpo de pedido
 export function idempotencyKeyFor(body: CreateOrderRequest): string {
   const serialized = JSON.stringify(body);
   const stored = read();

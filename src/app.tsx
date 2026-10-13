@@ -6,6 +6,7 @@ import { createQueryClient } from "@/lib/query-client";
 import { RealtimeProvider } from "@/realtime/realtime-provider";
 import { createAppRouter } from "@/router";
 
+// monta a aplicação: cache, tempo real e roteador
 export function renderApp(rootElement: HTMLElement) {
   const queryClient = createQueryClient();
   const router = createAppRouter({ queryClient });

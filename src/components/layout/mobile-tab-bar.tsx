@@ -16,6 +16,7 @@ import { useSessionToken } from "@/lib/use-session-token";
 import { useShowMobileTabBar } from "@/components/layout/use-show-mobile-tab-bar";
 import { cn } from "@/lib/utils";
 
+// estilo de cada ícone da barra
 const item = "relative flex size-11 items-center justify-center transition-colors";
 
 

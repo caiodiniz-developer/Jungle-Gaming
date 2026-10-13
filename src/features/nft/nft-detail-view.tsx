@@ -22,6 +22,7 @@ import { useIsDesktop } from "@/lib/use-media-query";
 import { cn } from "@/lib/utils";
 import { FlashOnChange } from "@/components/flash-on-change";
 
+// nota em estrelas
 function Rating({ rating, compact = false }: { rating: NftDetail["rating"]; compact?: boolean }) {
   const average = rating.average.toFixed(1).replace(".", ",");
   const label = `Nota ${average} de 5, ${rating.count} avaliações de colecionadores`;
@@ -60,6 +61,7 @@ function Rating({ rating, compact = false }: { rating: NftDetail["rating"]; comp
   );
 }
 
+// tela de detalhes do NFT (desktop e mobile)
 export function NftDetailView({ nft }: { nft: NftDetail }) {
   const navigate = useNavigate();
   const router = useRouter();

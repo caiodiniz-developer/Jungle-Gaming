@@ -10,6 +10,7 @@ import { catalogHandlers } from "@/mocks/handlers/catalog";
 import { orderHandlers } from "@/mocks/handlers/orders";
 import { realtimeHandlers } from "@/mocks/realtime";
 
+// service worker do MSW com todos os handlers
 const worker = setupWorker(
   ...authHandlers,
   ...catalogHandlers,
@@ -38,6 +39,7 @@ async function applyUrlOptions() {
   window.history.replaceState(window.history.state, "", url);
 }
 
+// inicia a camada de mocks
 export async function startMocks() {
   await initDb();
   await applyUrlOptions();

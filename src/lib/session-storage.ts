@@ -5,11 +5,14 @@
  */
 
 const TOKEN_KEY = "kurio.session.token";
+// chave do id do carrinho de visitante
 const GUEST_CART_KEY = "kurio.cart.guest-id";
 
 type Listener = (token: string | null) => void;
+// quem quer saber quando o token muda
 const listeners = new Set<Listener>();
 
+// lê do localStorage
 function read(key: string): string | null {
   try {
     return window.localStorage.getItem(key);
@@ -18,6 +21,7 @@ function read(key: string): string | null {
   }
 }
 
+// grava no localStorage
 function write(key: string, value: string | null) {
   try {
     if (value === null) window.localStorage.removeItem(key);
@@ -29,10 +33,12 @@ function write(key: string, value: string | null) {
 
 let currentToken = read(TOKEN_KEY);
 
+// token atual
 export function getSessionToken(): string | null {
   return currentToken;
 }
 
+// troca o token e avisa os interessados
 export function setSessionToken(token: string | null) {
   if (token === currentToken) return;
   currentToken = token;

@@ -1,6 +1,7 @@
 import type { Artwork } from "@/api/contracts";
 import { cn } from "@/lib/utils";
 
+// larguras disponíveis de cada arte
 const WIDTHS = [96, 256, 512, 900] as const;
 
 type NftImageProps = {

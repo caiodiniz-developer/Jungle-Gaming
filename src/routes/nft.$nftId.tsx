@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { nftDetailOptions, useNftDetail } from "@/features/catalog/use-nfts";
 import { NftDetailView } from "@/features/nft/nft-detail-view";
 
+// rota /nft/$nftId
 export const Route = createFileRoute("/nft/$nftId")({
   loader: ({ context, params }) => {
     void context.queryClient.prefetchQuery(nftDetailOptions(params.nftId));
@@ -41,6 +42,7 @@ function DetailSkeleton() {
   );
 }
 
+// página de detalhes: carregando, erro ou conteúdo
 function NftDetailPage() {
   const { nftId } = Route.useParams();
   const query = useNftDetail(nftId);

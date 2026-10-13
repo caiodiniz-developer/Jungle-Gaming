@@ -6,6 +6,7 @@ type NotFoundProps = {
   description?: string;
 };
 
+// tela de página não encontrada
 export function NotFound({
   title = "Página não encontrada",
   description = "O endereço acessado não existe ou foi movido.",

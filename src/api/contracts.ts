@@ -40,12 +40,14 @@ export type ApiErrorBody = {
 export type Network = "ethereum" | "polygon" | "solana";
 export type WalletProvider = "metamask" | "walletconnect" | "coinbase";
 
+// nome de cada rede para exibir na tela
 export const NETWORK_LABELS: Record<Network, string> = {
   ethereum: "Ethereum",
   polygon: "Polygon",
   solana: "Solana",
 };
 
+// nome de cada tipo de carteira para exibir na tela
 export const WALLET_PROVIDER_LABELS: Record<WalletProvider, string> = {
   metamask: "MetaMask",
   walletconnect: "WalletConnect",

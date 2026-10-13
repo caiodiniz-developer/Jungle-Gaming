@@ -7,6 +7,7 @@ import twitterIcon from "@/assets/icons/social-twitter.svg";
 import youtubeIcon from "@/assets/icons/social-youtube.svg";
 import { Reveal } from "@/components/reveal";
 
+// os três destaques do topo do rodapé
 const HIGHLIGHTS = [
   {
     initial: "W",
@@ -25,6 +26,7 @@ const HIGHLIGHTS = [
   },
 ];
 
+// redes sociais
 const SOCIAL = [
   { name: "Facebook", icon: facebookIcon, href: "https://www.facebook.com/" },
   { name: "Instagram", icon: instagramIcon, href: "https://www.instagram.com/" },
@@ -33,6 +35,7 @@ const SOCIAL = [
   { name: "YouTube", icon: youtubeIcon, href: "https://www.youtube.com/" },
 ];
 
+// links da coluna "Meu perfil"
 const PROFILE_ITEMS = [
   { label: "Meu perfil", to: "/conta/perfil" },
   { label: "Minha coleção", to: "/conta/arquivos" },
@@ -41,6 +44,7 @@ const PROFILE_ITEMS = [
   { label: "Lista de interesse", to: "/conta/favoritos" },
 ] as const;
 
+// links da coluna "Central de ajuda"
 const HELP_ITEMS = [
   { label: "Central de ajuda", hash: undefined },
   { label: "Como comprar NFTs", hash: "como-comprar" },
@@ -58,12 +62,15 @@ const COLLECTION_ITEMS = [
   { label: "Utilidade", id: "utilidade" },
 ];
 
+// estilo dos links do rodapé
 const footerLink = "hover:text-highlight";
 
+// título de coluna do rodapé
 function ColumnTitle({ children }: { children: React.ReactNode }) {
   return <h2 className="text-lg leading-5 font-bold">{children}</h2>;
 }
 
+// formulário da newsletter
 function Newsletter() {
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -103,6 +110,7 @@ function Newsletter() {
   );
 }
 
+// rodapé do site
 export function Footer() {
   return (
     <footer className="container-page pb-6">

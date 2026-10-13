@@ -17,9 +17,12 @@ type FiltersProps = {
 
 /** O slider trabalha em centésimos de ETH (inteiros); a URL recebe a string decimal. */
 const toCents = (value: string) => Math.round(Number(value) * 100);
+// centésimos → string decimal
 const fromCents = (cents: number) => (cents / 100).toFixed(2);
+// centésimos → texto com vírgula
 const display = (cents: number) => fromCents(cents).replace(".", ",");
 
+// grupo de filtros com caixas de seleção
 function FacetGroup({
   title,
   facets,
@@ -87,6 +90,7 @@ function FacetGroup({
   );
 }
 
+// filtro de faixa de preço
 function PriceFilter({ search, facets, onChange }: Omit<FiltersProps, "className">) {
   const headingId = useId();
   const floor = facets ? toCents(facets.priceRange.min) : 0;

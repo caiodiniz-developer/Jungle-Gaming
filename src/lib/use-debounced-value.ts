@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+// devolve o valor só depois de uma pausa
 export function useDebouncedValue<T>(value: T, delayMs: number): T {
   const [debounced, setDebounced] = useState(value);
   useEffect(() => {

@@ -4,6 +4,7 @@ import { getSessionToken } from "@/lib/session-storage";
 /** Rotas que exigem conta: checkout, pedidos e área do colecionador. */
 export const PROTECTED_PATHS = ["/conta", "/pagamento", "/pedidos"];
 
+// diz se a rota exige login
 export function isProtectedPath(pathname: string): boolean {
   return PROTECTED_PATHS.some((path) => pathname.startsWith(path));
 }

@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils"
 import { CheckIcon } from "lucide-react"
 import { Checkbox as CheckboxPrimitive } from "radix-ui"
 
+// componente caixa de seleção
 function Checkbox({
   className,
   ...props

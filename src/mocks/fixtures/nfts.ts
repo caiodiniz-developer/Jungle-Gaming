@@ -15,21 +15,26 @@ export const CATEGORIES = [
   { id: "utilidade", name: "Utilidade", count: 18 },
 ] as const;
 
+// artes disponíveis
 const ARTWORKS: Artwork[] = ["emerald-ape", "sage-nomad", "ivory-baron", "golden-beat"];
+// redes (com pesos)
 const NETWORKS: Network[] = ["ethereum", "ethereum", "ethereum", "polygon", "polygon", "solana"];
 
+// primeira palavra dos nomes gerados
 const ADJECTIVES = [
   "Amber", "Lunar", "Velvet", "Solar", "Crimson", "Silent", "Electric", "Hollow", "Golden",
   "Misty", "Neon", "Ancient", "Cobalt", "Feral", "Gilded", "Ivory", "Jade", "Obsidian",
   "Radiant", "Scarlet", "Tidal", "Umber", "Vivid", "Wild", "Zen", "Astral", "Burnt", "Copper",
 ];
 
+// segunda palavra dos nomes gerados
 const NOUNS = [
   "Drifter", "Oracle", "Voyager", "Monarch", "Echo", "Sentinel", "Nomad", "Baron", "Signal",
   "Bloom", "Vessel", "Beat", "Cipher", "Ronin", "Herald", "Warden", "Pilgrim", "Mirage",
   "Totem", "Rider", "Scholar", "Jester", "Prophet", "Outlaw", "Dreamer", "Keeper",
 ];
 
+// coleções por categoria
 const COLLECTIONS: Record<string, string[]> = {
   "arte-digital": ["Kurio Apes", "Pixel Reverie", "Chroma Fields"],
   fotografia: ["Still Frames", "Night Exposure"],
@@ -42,8 +47,10 @@ const COLLECTIONS: Record<string, string[]> = {
   utilidade: ["Access Keys", "Builder Badges"],
 };
 
+// criadores
 const CREATORS = ["Nova Sato", "Iris Okafor", "Téo Marins", "Lia Brandt", "Kenji Duarte", "Ada Reyes"];
 
+// atributos possíveis
 const ATTRIBUTE_POOL = [
   "Óculos", "Esmeralda", "Capuz", "Chapéu", "Fones", "Jaqueta", "Blazer", "Corrente", "Brinco",
   "Fundo creme", "Fundo verde", "Olhar sereno", "Sorriso", "Raro", "Edição de estreia",
@@ -51,6 +58,7 @@ const ATTRIBUTE_POOL = [
 
 /** Data fixa de referência: mantém `listedAt` estável entre execuções (regressão visual). */
 const REFERENCE_DATE = Date.UTC(2026, 6, 29, 12, 0, 0);
+// uma hora em ms
 const HOUR = 60 * 60 * 1000;
 
 type Featured = {
@@ -76,18 +84,22 @@ const FEATURED: Featured[] = [
   { name: "Golden Signal", token: 160, artwork: "golden-beat", price: "0.39", category: "colecionaveis" },
 ];
 
+// sorteia um item
 function pick<T>(items: readonly T[], random: () => number): T {
   return items[Math.floor(random() * items.length)] as T;
 }
 
+// centésimos → string decimal
 function cents(value: number): string {
   return (value / 100).toFixed(2);
 }
 
+// monta uma edição
 function edition(id: string, label: string, available: number): NftEdition {
   return { id, label, available, maxPerOrder: Math.min(available, 10) };
 }
 
+// edições de um NFT
 function buildEditions(random: () => number, soldOut: boolean): NftEdition[] {
   if (soldOut) {
     return [edition("1-1", "1/1", 0), edition("1-10", "1/10", 0), edition("1-50", "1/50", 0)];
@@ -101,6 +113,7 @@ function buildEditions(random: () => number, soldOut: boolean): NftEdition[] {
   return editions;
 }
 
+// monta um NFT
 function buildNft(options: {
   index: number;
   name: string;

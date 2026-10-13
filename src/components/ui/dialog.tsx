@@ -6,30 +6,35 @@ import { Dialog as DialogPrimitive } from "radix-ui"
 
 import { Button } from "@/components/ui/button"
 
+// componente diálogo (modal)
 function Dialog({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Root>) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />
 }
 
+// diálogo (modal): elemento que abre
 function DialogTrigger({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Trigger>) {
   return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />
 }
 
+// diálogo (modal): renderiza fora da árvore, no fim da página
 function DialogPortal({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Portal>) {
   return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />
 }
 
+// diálogo (modal): elemento que fecha
 function DialogClose({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Close>) {
   return <DialogPrimitive.Close data-slot="dialog-close" {...props} />
 }
 
+// diálogo (modal): fundo escurecido
 function DialogOverlay({
   className,
   ...props
@@ -46,6 +51,7 @@ function DialogOverlay({
   )
 }
 
+// diálogo (modal): conteúdo
 function DialogContent({
   className,
   children,
@@ -80,6 +86,7 @@ function DialogContent({
   )
 }
 
+// diálogo (modal): cabeçalho
 function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -90,6 +97,7 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+// diálogo (modal): rodapé
 function DialogFooter({
   className,
   showCloseButton = false,
@@ -117,6 +125,7 @@ function DialogFooter({
   )
 }
 
+// diálogo (modal): título
 function DialogTitle({
   className,
   ...props
@@ -130,6 +139,7 @@ function DialogTitle({
   )
 }
 
+// diálogo (modal): descrição
 function DialogDescription({
   className,
   ...props

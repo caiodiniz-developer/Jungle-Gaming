@@ -2,12 +2,14 @@ import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { AccountLayout } from "@/features/account/account-layout";
 import { requireSession } from "@/features/auth/guards";
 
+// rota /conta
 export const Route = createFileRoute("/conta")({
   // toda a área da conta exige sessão
   beforeLoad: requireSession,
   component: AccountRoute,
 });
 
+// moldura da conta com a seção atual dentro
 function AccountRoute() {
   return (
     <AccountLayout>

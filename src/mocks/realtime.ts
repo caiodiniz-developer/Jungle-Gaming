@@ -36,17 +36,22 @@ type Connection = {
 
 /** O handshake do binding anuncia pingInterval de 25 s e pingTimeout de 5 s. */
 const HEARTBEAT_MS = 20_000;
+// pacote de ping do Engine.IO
 const ENGINE_IO_PING = "2";
 
+// conexões abertas
 const connections = new Map<string, Connection>();
+// eventos já emitidos
 const eventLog: ServerEvent[] = [];
 let accepting = true;
 
 // o MSW remove o prefixo "/socket.io/" do caminho antes de comparar, então o
 // link aponta para a raiz da origem
 const socketOrigin = (env.socketUrl || window.location.origin).replace(/^http/, "ws");
+// ponto de interceptação do WebSocket
 const link = ws.link(socketOrigin);
 
+// handler das conexões Socket.IO
 export const realtimeHandlers = [
   link.addEventListener("connection", (connection) => {
     // outros WebSockets da mesma origem (ex.: HMR do Vite) seguem para o servidor real
@@ -91,6 +96,7 @@ export const realtimeHandlers = [
   }),
 ];
 
+// entrega o evento às conexões certas
 function deliver(event: ServerEvent) {
   for (const connection of connections.values()) {
     // eventos privados só chegam às conexões associadas ao dono do recurso
@@ -99,11 +105,13 @@ function deliver(event: ServerEvent) {
   }
 }
 
+// guarda o evento no histórico
 function record(event: ServerEvent) {
   eventLog.push(event);
   if (eventLog.length > 100) eventLog.shift();
 }
 
+// próximo id de evento
 function nextEventId(): string {
   const current = db();
   current.counters.event += 1;
@@ -111,6 +119,7 @@ function nextEventId(): string {
   return `evt_${String(current.counters.event).padStart(6, "0")}`;
 }
 
+// emite nft.updated
 export function emitNftUpdated(nft: DbNft): NftUpdatedEvent {
   const event: NftUpdatedEvent = {
     id: nextEventId(),
@@ -125,6 +134,7 @@ export function emitNftUpdated(nft: DbNft): NftUpdatedEvent {
   return event;
 }
 
+// emite order.updated
 export function emitOrderUpdated(order: DbOrder, publicOrder: Order): OrderUpdatedEvent {
   const event: OrderUpdatedEvent = {
     id: nextEventId(),
@@ -155,6 +165,7 @@ export function emitRaw(event: ServerEvent) {
   deliver(event);
 }
 
+// histórico de eventos
 export function getEventLog(): ServerEvent[] {
   return [...eventLog];
 }
@@ -165,10 +176,12 @@ export function dropConnections({ refuseNew = false } = {}) {
   for (const connection of [...connections.values()]) connection.close();
 }
 
+// volta a aceitar conexões
 export function restoreConnections() {
   accepting = true;
 }
 
+// número de conexões abertas
 export function connectionCount(): number {
   return connections.size;
 }

@@ -4,6 +4,7 @@ import { Promos } from "@/features/catalog/home-sections";
 import { useNftList } from "@/features/catalog/use-nfts";
 import { RelatedCarousel } from "@/features/nft/related-carousel";
 
+// página Criadores
 export function CreatorsPage() {
   const { data } = useNftList({ tab: "em-alta", pageSize: 10 });
 

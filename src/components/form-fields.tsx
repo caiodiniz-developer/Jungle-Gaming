@@ -5,6 +5,7 @@ import eyeOffIcon from "@/assets/icons/eye-off.svg";
 import { Icon } from "@/components/icon";
 import { cn } from "@/lib/utils";
 
+// estilo comum de input e select
 const controlClass =
   "h-10 w-full min-w-0 rounded-sm border border-input bg-transparent px-3 text-sm text-foreground transition-colors outline-none placeholder:text-subtle focus-visible:border-primary focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive";
 
@@ -52,6 +53,7 @@ function FieldShell({ id, label, required, hideLabel, error, hint, className, ch
   );
 }
 
+// id do texto (erro ou dica) que descreve o campo
 function describedBy(id: string, error?: string, hint?: string) {
   if (error) return `${id}-error`;
   if (hint) return `${id}-hint`;
@@ -68,6 +70,7 @@ type TextFieldProps = CommonProps &
     leading?: React.ReactNode;
   };
 
+// campo de texto com rótulo e erro
 export function TextField({
   label,
   required,
@@ -163,6 +166,7 @@ type SelectFieldProps = CommonProps &
     options: { value: string; label: string }[];
   };
 
+// campo de seleção com rótulo e erro
 export function SelectField({
   label,
   required,

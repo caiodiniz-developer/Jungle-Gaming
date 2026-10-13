@@ -15,6 +15,7 @@ type CatalogToolbarProps = {
   onChange: (patch: Partial<CatalogSearch>) => void;
 };
 
+// abas do catálogo (todos, novos, em alta)
 export function CatalogTabs({ search }: Pick<CatalogToolbarProps, "search">) {
   const active: NftTab = search.aba ?? "todos";
 
@@ -51,6 +52,7 @@ export function CatalogTabs({ search }: Pick<CatalogToolbarProps, "search">) {
   );
 }
 
+// seletor de ordenação
 export function SortSelect({ search, onChange }: CatalogToolbarProps) {
   const value: NftSort = search.ordem ?? "recentes";
 

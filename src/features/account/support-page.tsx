@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { SectionTitle } from "@/features/account/section-states";
 
+// página Suporte
 export function SupportPage() {
   return (
     <div className="flex flex-col gap-6">

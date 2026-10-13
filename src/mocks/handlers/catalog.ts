@@ -3,20 +3,26 @@ import { commit, db } from "@/mocks/db";
 import { findNft, listNfts, toNftDetail } from "@/mocks/domain/catalog";
 import { fail, json, requireUser, route } from "@/mocks/http";
 
+// abas aceitas
 const TABS: NftTab[] = ["todos", "novos", "em-alta"];
+// ordenações aceitas
 const SORTS: NftSort[] = ["recentes", "preco-asc", "preco-desc", "nome"];
+// redes aceitas
 const NETWORKS: Network[] = ["ethereum", "polygon", "solana"];
 
+// "a,b" → ["a", "b"]
 function list(value: string | null): string[] {
   return value ? value.split(",").map((item) => item.trim()).filter(Boolean) : [];
 }
 
+// texto → inteiro
 function integer(value: string | null): number | undefined {
   if (value === null) return undefined;
   const parsed = Number(value);
   return Number.isInteger(parsed) ? parsed : undefined;
 }
 
+// query string → parâmetros da listagem
 function parseListParams(query: URLSearchParams): NftListParams {
   const tab = query.get("tab") as NftTab | null;
   const sort = query.get("sort") as NftSort | null;
@@ -35,12 +41,14 @@ function parseListParams(query: URLSearchParams): NftListParams {
   };
 }
 
+// favoritos de um usuário
 function favoritesOf(userId: string): string[] {
   const favorites = db().favorites;
   favorites[userId] ??= [];
   return favorites[userId];
 }
 
+// rotas de NFTs e favoritos
 export const catalogHandlers = [
   route("get", "/nfts", ({ url }) => json(listNfts(parseListParams(url.searchParams)))),
 

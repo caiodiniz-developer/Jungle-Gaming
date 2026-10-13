@@ -41,9 +41,12 @@ import { cn } from "@/lib/utils";
 const checkoutSchema = createOrderSchema.omit({ quoteHash: true });
 type CheckoutValues = z.output<typeof checkoutSchema>;
 
+// opções do select de rede
 const NETWORK_OPTIONS = Object.entries(NETWORK_LABELS).map(([value, label]) => ({ value, label }));
+// tipos de carteira
 const PROVIDERS = Object.keys(WALLET_PROVIDER_LABELS) as WalletProvider[];
 
+// campos que podem receber erro da API
 const API_FIELDS = [
   "collector.displayName",
   "collector.username",
@@ -59,6 +62,7 @@ const API_FIELDS = [
 
 type Connection = { walletId: string; provider: WalletProvider; network: Network };
 
+// confere o formato dos detalhes de cotação desatualizada
 function isQuoteStaleDetails(details: unknown): details is QuoteStaleDetails {
   return (
     typeof details === "object" &&
@@ -69,6 +73,7 @@ function isQuoteStaleDetails(details: unknown): details is QuoteStaleDetails {
   );
 }
 
+// frase que explica o que mudou na cotação
 function describeChange(change: QuoteChange): string {
   if (change.kind === "price") {
     return `O preço de ${change.name} mudou de ${change.from} para ${change.to}.`;
@@ -78,6 +83,7 @@ function describeChange(change: QuoteChange): string {
   return `A disponibilidade de ${change.name} mudou: agora há ${change.to} por pedido.`;
 }
 
+// opção em forma de cartão com rádio
 function RadioCard({
   checked,
   className,
@@ -107,6 +113,7 @@ function RadioCard({
   );
 }
 
+// itens do pedido no resumo
 function OrderLines({ quote }: { quote: Quote }) {
   return (
     <ul className="flex flex-col gap-3">
@@ -139,6 +146,7 @@ type CheckoutFormProps = {
   cartIsEmpty: boolean;
 };
 
+// formulário de pagamento
 function CheckoutForm({ user, wallets, cartIsEmpty }: CheckoutFormProps) {
   const isDesktop = useIsDesktop();
   const navigate = useNavigate();
@@ -590,6 +598,7 @@ function CheckoutForm({ user, wallets, cartIsEmpty }: CheckoutFormProps) {
   );
 }
 
+// página de pagamento
 export function CheckoutPage() {
   const isDesktop = useIsDesktop();
   const { user } = useSession();

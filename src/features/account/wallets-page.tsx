@@ -11,12 +11,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useSaveWallet, useWallets } from "@/features/account/use-account";
 import { applyApiError } from "@/lib/form-errors";
 
+// opções do select de rede
 const NETWORK_OPTIONS = Object.entries(NETWORK_LABELS).map(([value, label]) => ({ value, label }));
+// opções do select de tipo de carteira
 const PROVIDER_OPTIONS = Object.entries(WALLET_PROVIDER_LABELS).map(([value, label]) => ({
   value,
   label,
 }));
 
+// campos que podem receber erro da API
 const FIELDS = [
   "displayName",
   "alias",
@@ -37,6 +40,7 @@ type WalletFormValues = Omit<WalletValues, "network" | "provider"> & {
   provider: WalletValues["provider"] | "";
 };
 
+// valores iniciais do formulário
 function toFormValues(kind: WalletKind, source?: Wallet | null): WalletFormValues {
   return {
     kind,
@@ -62,6 +66,7 @@ type WalletFormProps = {
   onSaved?: () => void;
 };
 
+// formulário de uma carteira
 function WalletForm({ kind, wallet, template, onSaved }: WalletFormProps) {
   const save = useSaveWallet();
   const [formError, setFormError] = useState<string | null>(null);
@@ -201,6 +206,7 @@ function WalletForm({ kind, wallet, template, onSaved }: WalletFormProps) {
   );
 }
 
+// página Carteiras (principal e secundária)
 export function WalletsPage() {
   const { data: wallets, isPending, isError, error, refetch } = useWallets();
   const [addingPrimary, setAddingPrimary] = useState(false);

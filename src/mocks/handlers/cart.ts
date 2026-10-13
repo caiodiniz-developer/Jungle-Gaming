@@ -4,6 +4,7 @@ import { findNft } from "@/mocks/domain/catalog";
 import { buildQuote, COUPONS, getCart, toCartView, touchCart } from "@/mocks/domain/pricing";
 import { cartOwner, fail, json, readBody, route } from "@/mocks/http";
 
+// corpo da cotação
 const quoteSchema = z.object({
   network: z.enum(["ethereum", "polygon", "solana"]).optional(),
 });
@@ -23,6 +24,7 @@ function purchasableLimit(nftId: string, editionId: string): number {
   return limit;
 }
 
+// recusa quantidade acima do disponível
 function assertWithinLimit(quantity: number, limit: number) {
   if (quantity > limit) {
     fail(
@@ -36,11 +38,13 @@ function assertWithinLimit(quantity: number, limit: number) {
   }
 }
 
+// "nft:edição" → partes
 function splitLineId(lineId: string): { nftId: string; editionId: string } {
   const [nftId = "", editionId = ""] = decodeURIComponent(lineId).split(":");
   return { nftId, editionId };
 }
 
+// rotas do carrinho, cupom e cotação
 export const cartHandlers = [
   route("get", "/cart", ({ request }) => json(toCartView(getCart(cartOwner(request).key)))),
 

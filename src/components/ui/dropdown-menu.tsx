@@ -4,12 +4,14 @@ import { cn } from "@/lib/utils"
 import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react"
 import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui"
 
+// componente menu suspenso
 function DropdownMenu({
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Root>) {
   return <DropdownMenuPrimitive.Root data-slot="dropdown-menu" {...props} />
 }
 
+// menu suspenso: renderiza fora da árvore, no fim da página
 function DropdownMenuPortal({
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Portal>) {
@@ -18,6 +20,7 @@ function DropdownMenuPortal({
   )
 }
 
+// menu suspenso: elemento que abre
 function DropdownMenuTrigger({
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Trigger>) {
@@ -29,6 +32,7 @@ function DropdownMenuTrigger({
   )
 }
 
+// menu suspenso: conteúdo
 function DropdownMenuContent({
   className,
   sideOffset = 4,
@@ -49,6 +53,7 @@ function DropdownMenuContent({
   )
 }
 
+// menu suspenso: grupo de itens
 function DropdownMenuGroup({
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Group>) {
@@ -57,6 +62,7 @@ function DropdownMenuGroup({
   )
 }
 
+// menu suspenso: item
 function DropdownMenuItem({
   className,
   inset,
@@ -80,6 +86,7 @@ function DropdownMenuItem({
   )
 }
 
+// menu suspenso: item com caixa de seleção
 function DropdownMenuCheckboxItem({
   className,
   children,
@@ -106,6 +113,7 @@ function DropdownMenuCheckboxItem({
   )
 }
 
+// menu suspenso: grupo de itens de escolha única
 function DropdownMenuRadioGroup({
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.RadioGroup>) {
@@ -117,6 +125,7 @@ function DropdownMenuRadioGroup({
   )
 }
 
+// menu suspenso: item de escolha única
 function DropdownMenuRadioItem({
   className,
   children,
@@ -141,6 +150,7 @@ function DropdownMenuRadioItem({
   )
 }
 
+// menu suspenso: rótulo
 function DropdownMenuLabel({
   className,
   inset,
@@ -161,6 +171,7 @@ function DropdownMenuLabel({
   )
 }
 
+// menu suspenso: linha separadora
 function DropdownMenuSeparator({
   className,
   ...props
@@ -174,6 +185,7 @@ function DropdownMenuSeparator({
   )
 }
 
+// menu suspenso: atalho de teclado
 function DropdownMenuShortcut({
   className,
   ...props
@@ -190,12 +202,14 @@ function DropdownMenuShortcut({
   )
 }
 
+// menu suspenso: submenu
 function DropdownMenuSub({
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Sub>) {
   return <DropdownMenuPrimitive.Sub data-slot="dropdown-menu-sub" {...props} />
 }
 
+// menu suspenso: elemento que abre
 function DropdownMenuSubTrigger({
   className,
   inset,
@@ -220,6 +234,7 @@ function DropdownMenuSubTrigger({
   )
 }
 
+// menu suspenso: conteúdo do submenu
 function DropdownMenuSubContent({
   className,
   ...props

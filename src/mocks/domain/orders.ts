@@ -9,8 +9,10 @@ import { fail } from "@/mocks/http";
 import { emitNftUpdated, emitOrderUpdated } from "@/mocks/realtime";
 import type { DbNft, DbOrder, DbUser } from "@/mocks/types";
 
+// temporizadores de resolução dos pedidos
 const timers = new Map<string, number>();
 
+// pedido sem os campos internos
 export function toPublicOrder(order: DbOrder): Order {
   // remove os campos internos do banco simulado
   const copy: Partial<DbOrder> = structuredClone(order);
@@ -22,6 +24,7 @@ export function toPublicOrder(order: DbOrder): Order {
   return copy as Order;
 }
 
+// sobe a versão do NFT e emite o evento
 function bumpNft(nft: DbNft) {
   nft.version += 1;
   for (const edition of nft.editions) edition.maxPerOrder = Math.min(edition.available, 10);
@@ -64,6 +67,7 @@ function applySubmitScenario(userId: string) {
   }
 }
 
+// cria o pedido (idempotente)
 export function createOrder(
   user: DbUser,
   body: CreateOrderRequest,
@@ -165,6 +169,7 @@ export function createOrder(
   return { order, replayed: false };
 }
 
+// agenda a confirmação ou recusa
 function scheduleResolution(order: DbOrder) {
   if (order.status !== "pending" || order.resolveAt === null || timers.has(order.id)) return;
   const wait = Math.max(0, order.resolveAt - Date.now());
@@ -180,6 +185,7 @@ export function resumePendingOrders() {
   for (const order of db().orders) scheduleResolution(order);
 }
 
+// cancela os temporizadores
 export function cancelOrderTimers() {
   for (const timer of timers.values()) window.clearTimeout(timer);
   timers.clear();
