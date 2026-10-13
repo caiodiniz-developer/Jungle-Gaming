@@ -45,14 +45,7 @@ function CartLineRow({ line }: { line: CartLine }) {
       { onError: (error) => toast.error(error.message) },
     );
 
-  const removeLine = () =>
-    remove.mutate(
-      { lineId: line.id },
-      {
-        onSuccess: () => toast.success(`${line.name} removido do carrinho.`),
-        onError: () => toast.error(`Não foi possível remover ${line.name}. Tente novamente.`),
-      },
-    );
+  const removeLine = () => remove.mutate({ lineId: line.id, name: line.name });
 
   return (
     <li

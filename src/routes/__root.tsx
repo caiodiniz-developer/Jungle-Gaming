@@ -32,7 +32,12 @@ function RootLayout() {
         Pular para o conteúdo
       </a>
       <Header />
-      <main id="conteudo" tabIndex={-1} className={cn("flex-1 outline-none", hasTabBar && "max-lg:pb-[110px]")}>
+      {/* altura mínima de uma tela: o rodapé fica abaixo da dobra e não é empurrado quando os dados chegam */}
+      <main
+        id="conteudo"
+        tabIndex={-1}
+        className={cn("min-h-dvh flex-1 outline-none", hasTabBar && "max-lg:pb-[110px]")}
+      >
         {/* fade a cada troca de seção; só opacidade, para não deslocar as barras fixas */}
         <div key={section} className="animate-fade">
           <Outlet />

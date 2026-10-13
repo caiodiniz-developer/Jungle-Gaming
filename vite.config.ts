@@ -13,6 +13,8 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
+      // lista de sufixos públicos usada só pelos cookies do MSW (ver o arquivo)
+      tldts: fileURLToPath(new URL("./src/mocks/tldts-stub.ts", import.meta.url)),
     },
   },
   server: { port: 5173, strictPort: true },

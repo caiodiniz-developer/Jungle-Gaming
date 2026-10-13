@@ -202,6 +202,23 @@ function CheckoutForm({ user, wallets, cartIsEmpty }: CheckoutFormProps) {
   /** Corpo da última tentativa que falhou sem resposta definitiva: repetir reenvia exatamente ele. */
   const [retryBody, setRetryBody] = useState<CreateOrderRequest | null>(null);
 
+  /**
+   * Cotação que o usuário já revisou nesta rede. Se a cotação em tela passar a
+   * ser outra sem ação dele (preço ou disponibilidade mudaram em tempo real), a
+   * compra exige nova confirmação: o aviso aparece e o botão muda de texto.
+   */
+  const [reviewed, setReviewed] = useState<Pick<Quote, "network" | "hash" | "total"> | null>(null);
+  const current = quote.data;
+  if (current && (reviewed === null || reviewed.network !== current.network)) {
+    setReviewed({ network: current.network, hash: current.hash, total: current.total });
+  }
+  const changedSinceReview =
+    current !== undefined &&
+    reviewed !== null &&
+    reviewed.network === current.network &&
+    reviewed.hash !== current.hash;
+  const needsReconfirmation = stale !== null || changedSinceReview;
+
   // a conexão vale para a combinação exata de carteira, provedor e rede
   const connected =
     connection !== null &&
@@ -278,6 +295,8 @@ function CheckoutForm({ user, wallets, cartIsEmpty }: CheckoutFormProps) {
     setFormError(null);
     setStale(null);
     setRetryBody(null);
+    // confirmar é aceitar os valores em tela: eles passam a ser a cotação revisada
+    if (current) setReviewed({ network: current.network, hash: current.hash, total: current.total });
     order.mutate(body, {
       onSuccess: (created) =>
         void navigate({ to: "/pedidos/$orderId", params: { orderId: created.id }, replace: true }),
@@ -308,7 +327,11 @@ function CheckoutForm({ user, wallets, cartIsEmpty }: CheckoutFormProps) {
       disabled={!canConfirm || order.isPending || quote.isFetching}
       className="w-full lg:rounded-lg"
     >
-      {order.isPending ? "Enviando pedido…" : stale ? "Confirmar com os novos valores" : "Confirmar compra"}
+      {order.isPending
+        ? "Enviando pedido…"
+        : needsReconfirmation
+          ? "Confirmar com os novos valores"
+          : "Confirmar compra"}
     </Button>
   );
 
@@ -484,6 +507,17 @@ function CheckoutForm({ user, wallets, cartIsEmpty }: CheckoutFormProps) {
             updating={quote.isFetching}
           />
         </section>
+
+        {!stale && changedSinceReview && current && reviewed && (
+          <div role="alert" className="flex flex-col gap-2 rounded-sm border border-coral/60 bg-coral/10 p-3 text-sm leading-5">
+            <p className="font-bold">Os valores mudaram desde a sua revisão.</p>
+            <p>
+              {current.purchasable
+                ? `O total passou de ${formatEthLabel(reviewed.total)} para ${formatEthLabel(current.total)}. Confira o resumo e confirme novamente.`
+                : "Ajuste o carrinho para continuar."}
+            </p>
+          </div>
+        )}
 
         {stale && (
           <div role="alert" className="flex flex-col gap-2 rounded-sm border border-coral/60 bg-coral/10 p-3 text-sm leading-5">

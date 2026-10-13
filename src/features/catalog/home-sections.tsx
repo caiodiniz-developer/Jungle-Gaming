@@ -2,10 +2,10 @@ import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import type { Artwork } from "@/api/contracts";
 import arrowRightIcon from "@/assets/icons/arrow-right.svg";
-import heroMaskMobile from "@/assets/icons/hero-mask-mobile.svg";
 import promoMask from "@/assets/icons/promo-mask.svg";
 import { Icon } from "@/components/icon";
 import { NftImage } from "@/components/nft-image";
+import { HeroMaskMobile } from "@/features/catalog/hero-mask-mobile";
 import { cn } from "@/lib/utils";
 import { Reveal } from "@/components/reveal";
 
@@ -108,12 +108,7 @@ export function Hero() {
 
       {/* mobile */}
       <div className="relative flex min-h-[190px] flex-col items-center justify-center gap-2.5 overflow-hidden rounded-xl bg-surface p-4 lg:hidden">
-        <img
-          src={heroMaskMobile}
-          alt=""
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 size-full object-cover opacity-10"
-        />
+        <HeroMaskMobile className="pointer-events-none absolute inset-0 size-full opacity-10" />
         <div className="relative flex w-full items-center gap-2">
           <div className="flex min-w-0 flex-1 flex-col items-start gap-1.5">
             <p className="text-xs leading-4 font-medium">Bem-vindo à Kurio</p>

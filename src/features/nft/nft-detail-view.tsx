@@ -30,6 +30,7 @@ function Rating({ rating, compact = false }: { rating: NftDetail["rating"]; comp
   if (compact) {
     return (
       <p
+        role="img"
         aria-label={label}
         className="flex h-[27px] shrink-0 items-center gap-1 rounded-full border border-primary px-2 text-sm leading-4"
       >
@@ -121,7 +122,7 @@ export function NftDetailView({ nft }: { nft: NftDetail }) {
               className={cn(
                 "relative flex h-7 cursor-pointer items-center justify-center rounded-full border px-2 text-sm leading-4 transition-colors has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring",
                 selected ? "border-primary font-medium text-highlight" : "border-border text-sand hover:border-border-soft",
-                soldOut && "border-dashed opacity-60",
+                soldOut && "border-dashed",
               )}
             >
               <input

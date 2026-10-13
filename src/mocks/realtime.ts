@@ -38,6 +38,10 @@ type Connection = {
 const HEARTBEAT_MS = 20_000;
 // pacote de ping do Engine.IO
 const ENGINE_IO_PING = "2";
+// pacote de abertura do Engine.IO
+const ENGINE_IO_OPEN = "0";
+// tempo até derrubar uma conexão recusada, depois de entregar o handshake
+const REFUSED_CLOSE_DELAY_MS = 50;
 
 // conexões abertas
 const connections = new Map<string, Connection>();
@@ -61,8 +65,18 @@ export const realtimeHandlers = [
     }
 
     if (!accepting) {
-      // simula servidor fora do ar: o cliente entra em tentativa de reconexão
-      connection.client.close();
+      // Simula servidor fora do ar. O transporte abre (handshake do Engine.IO) e
+      // cai em seguida, sem aceitar o namespace: o cliente não chega a "connect"
+      // e segue tentando reconectar. Fechar antes do handshake deixaria o
+      // socket.io-client parado em "opening" até o timeout de 20 s do Manager.
+      queueMicrotask(() => {
+        connection.client.send(
+          ENGINE_IO_OPEN +
+            JSON.stringify({ sid: "indisponivel", upgrades: [], pingInterval: 25000, pingTimeout: 5000, maxPayload: 1e6 }),
+        );
+        // o fechamento espera o cliente receber o handshake (um fechamento imediato o descartaria)
+        window.setTimeout(() => connection.client.close(), REFUSED_CLOSE_DELAY_MS);
+      });
       return;
     }
 

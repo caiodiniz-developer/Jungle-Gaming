@@ -1,0 +1,262 @@
+{
+  "environment": {
+    "date": "2026-10-13T21:37:20.355Z",
+    "lighthouse": "13.5.0",
+    "chrome": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "node": "v24.13.0",
+    "os": "Windows_NT 10.0.26200 (x64)",
+    "cpu": "AMD Ryzen 5 5500                                × 12",
+    "memoryGb": 16,
+    "benchmarkIndex": 2387.5,
+    "server": "vite preview (build de produção, sem compressão)",
+    "mocks": "cenário padrão (latência simulada de 120–380 ms por requisição)"
+  },
+  "thresholds": {
+    "performance": 90,
+    "accessibility": 95,
+    "best-practices": 95,
+    "seo": 90
+  },
+  "results": [
+    {
+      "page": "Início",
+      "path": "/",
+      "profile": "mobile",
+      "median": {
+        "scores": {
+          "performance": 84,
+          "accessibility": 100,
+          "best-practices": 100,
+          "seo": 100
+        },
+        "metrics": {
+          "lcp": 3903,
+          "cls": 0,
+          "tbt": 80
+        }
+      },
+      "runs": [
+        {
+          "scores": {
+            "performance": 84,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "metrics": {
+            "lcp": 3913,
+            "cls": 0,
+            "tbt": 80
+          }
+        },
+        {
+          "scores": {
+            "performance": 84,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "metrics": {
+            "lcp": 3895,
+            "cls": 0,
+            "tbt": 68
+          }
+        },
+        {
+          "scores": {
+            "performance": 84,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "metrics": {
+            "lcp": 3903,
+            "cls": 0,
+            "tbt": 82
+          }
+        }
+      ],
+      "report": "inicio-mobile.report.html"
+    },
+    {
+      "page": "Início",
+      "path": "/",
+      "profile": "desktop",
+      "median": {
+        "scores": {
+          "performance": 99,
+          "accessibility": 100,
+          "best-practices": 100,
+          "seo": 100
+        },
+        "metrics": {
+          "lcp": 876,
+          "cls": 0,
+          "tbt": 0
+        }
+      },
+      "runs": [
+        {
+          "scores": {
+            "performance": 99,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "metrics": {
+            "lcp": 878,
+            "cls": 0,
+            "tbt": 0
+          }
+        },
+        {
+          "scores": {
+            "performance": 99,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "metrics": {
+            "lcp": 876,
+            "cls": 0,
+            "tbt": 0
+          }
+        },
+        {
+          "scores": {
+            "performance": 98,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "metrics": {
+            "lcp": 870,
+            "cls": 0,
+            "tbt": 0
+          }
+        }
+      ],
+      "report": "inicio-desktop.report.html"
+    },
+    {
+      "page": "Detalhes do NFT",
+      "path": "/nft/nft-0042",
+      "profile": "mobile",
+      "median": {
+        "scores": {
+          "performance": 85,
+          "accessibility": 100,
+          "best-practices": 100,
+          "seo": 100
+        },
+        "metrics": {
+          "lcp": 3662,
+          "cls": 0,
+          "tbt": 73
+        }
+      },
+      "runs": [
+        {
+          "scores": {
+            "performance": 84,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "metrics": {
+            "lcp": 3658,
+            "cls": 0,
+            "tbt": 72
+          }
+        },
+        {
+          "scores": {
+            "performance": 85,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "metrics": {
+            "lcp": 3662,
+            "cls": 0,
+            "tbt": 73
+          }
+        },
+        {
+          "scores": {
+            "performance": 85,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "metrics": {
+            "lcp": 3662,
+            "cls": 0,
+            "tbt": 73
+          }
+        }
+      ],
+      "report": "detalhe-mobile.report.html"
+    },
+    {
+      "page": "Detalhes do NFT",
+      "path": "/nft/nft-0042",
+      "profile": "desktop",
+      "median": {
+        "scores": {
+          "performance": 99,
+          "accessibility": 100,
+          "best-practices": 100,
+          "seo": 100
+        },
+        "metrics": {
+          "lcp": 873,
+          "cls": 0,
+          "tbt": 0
+        }
+      },
+      "runs": [
+        {
+          "scores": {
+            "performance": 99,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "metrics": {
+            "lcp": 873,
+            "cls": 0,
+            "tbt": 0
+          }
+        },
+        {
+          "scores": {
+            "performance": 99,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "metrics": {
+            "lcp": 879,
+            "cls": 0,
+            "tbt": 0
+          }
+        },
+        {
+          "scores": {
+            "performance": 98,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "metrics": {
+            "lcp": 867,
+            "cls": 0,
+            "tbt": 0
+          }
+        }
+      ],
+      "report": "detalhe-desktop.report.html"
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 import { useIsMutating, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import type { AddCartItemRequest, Cart, Network } from "@/api/contracts";
 import {
   addCartItem,
@@ -129,15 +130,19 @@ export function useRemoveCartItem() {
   return useMutation({
     mutationKey: CART_MUTATION_KEY,
     scope: CART_SCOPE,
-    mutationFn: ({ lineId }: { lineId: string }) => removeCartItem(lineId),
+    mutationFn: ({ lineId }: { lineId: string; name: string }) => removeCartItem(lineId),
     onMutate: ({ lineId }) =>
       optimisticCart(sync, (cart) => cart.lines.filter((line) => line.id !== lineId)),
-    onError: (_error, _variables, context) => {
+    // os avisos ficam aqui: a linha some da tela na hora, e callbacks passados a
+    // `mutate` por um componente já desmontado não são chamados
+    onError: (_error, { name }, context) => {
       if (context?.previous) sync.queryClient.setQueryData(sync.cartKey, context.previous);
       if (sync.isLastMutation()) sync.refresh();
+      toast.error(`Não foi possível remover ${name}. Tente novamente.`);
     },
-    onSuccess: (cart) => {
+    onSuccess: (cart, { name }) => {
       if (sync.isLastMutation()) sync.apply(cart);
+      toast.success(`${name} removido do carrinho.`);
     },
   });
 }
