@@ -25,36 +25,42 @@ const HIGHLIGHTS = [
 ];
 
 const SOCIAL = [
-  { name: "Facebook", icon: facebookIcon },
-  { name: "Instagram", icon: instagramIcon },
-  { name: "Twitter", icon: twitterIcon },
-  { name: "LinkedIn", icon: linkedinIcon },
-  { name: "YouTube", icon: youtubeIcon },
+  { name: "Facebook", icon: facebookIcon, href: "https://www.facebook.com/" },
+  { name: "Instagram", icon: instagramIcon, href: "https://www.instagram.com/" },
+  { name: "Twitter", icon: twitterIcon, href: "https://twitter.com/" },
+  { name: "LinkedIn", icon: linkedinIcon, href: "https://www.linkedin.com/" },
+  { name: "YouTube", icon: youtubeIcon, href: "https://www.youtube.com/" },
 ];
+
+const PROFILE_ITEMS = [
+  { label: "Meu perfil", to: "/conta/perfil" },
+  { label: "Minha coleção", to: "/conta/arquivos" },
+  { label: "Atividade", to: "/conta/atividade" },
+  { label: "Estúdio do criador", to: "/criadores" },
+  { label: "Lista de interesse", to: "/conta/favoritos" },
+] as const;
 
 const HELP_ITEMS = [
-  "Central de ajuda",
-  "Como comprar NFTs",
-  "Carteira e segurança",
-  "Política do mercado",
-  "Denunciar item",
+  { label: "Central de ajuda", hash: undefined },
+  { label: "Como comprar NFTs", hash: "como-comprar" },
+  { label: "Carteira e segurança", hash: "carteira-e-seguranca" },
+  { label: "Política do mercado", hash: "politica-do-mercado" },
+  { label: "Denunciar item", hash: "denunciar-item" },
 ];
 
-const COLLECTION_ITEMS = ["Arte digital", "Fotografia", "Música", "Arte 3D", "Utilidade"];
+/** Cada coleção abre o catálogo já filtrado por ela. */
+const COLLECTION_ITEMS = [
+  { label: "Arte digital", id: "arte-digital" },
+  { label: "Fotografia", id: "fotografia" },
+  { label: "Música", id: "musica" },
+  { label: "Arte 3D", id: "arte-3d" },
+  { label: "Utilidade", id: "utilidade" },
+];
+
+const footerLink = "hover:text-highlight";
 
 function ColumnTitle({ children }: { children: React.ReactNode }) {
   return <h2 className="text-lg leading-5 font-bold">{children}</h2>;
-}
-
-/** Itens de páginas fora do escopo: mantêm o layout, mas não são links. */
-function StaticList({ items }: { items: string[] }) {
-  return (
-    <ul className="text-sm leading-[30px]">
-      {items.map((item) => (
-        <li key={item}>{item}</li>
-      ))}
-    </ul>
-  );
 }
 
 function Newsletter() {
@@ -149,26 +155,40 @@ export function Footer() {
         <div className="flex flex-col gap-2">
           <ColumnTitle>Meu perfil</ColumnTitle>
           <ul className="text-sm leading-[30px]">
-            <li>
-              <Link to="/conta/perfil" className="hover:text-highlight">
-                Meu perfil
-              </Link>
-            </li>
-            <li>Minha coleção</li>
-            <li>Atividade</li>
-            <li>Estúdio do criador</li>
-            <li>Lista de interesse</li>
+            {PROFILE_ITEMS.map((item) => (
+              <li key={item.label}>
+                <Link to={item.to} className={footerLink}>
+                  {item.label}
+                </Link>
+              </li>
+            ))}
           </ul>
         </div>
 
         <div className="flex flex-col gap-2">
           <ColumnTitle>Central de ajuda</ColumnTitle>
-          <StaticList items={HELP_ITEMS} />
+          <ul className="text-sm leading-[30px]">
+            {HELP_ITEMS.map((item) => (
+              <li key={item.label}>
+                <Link to="/ajuda" hash={item.hash} className={footerLink}>
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
 
         <div className="flex flex-col gap-2">
           <ColumnTitle>Coleções</ColumnTitle>
-          <StaticList items={COLLECTION_ITEMS} />
+          <ul className="text-sm leading-[30px]">
+            {COLLECTION_ITEMS.map((item) => (
+              <li key={item.id}>
+                <Link to="/" search={{ colecoes: item.id }} hash="catalogo" className={footerLink}>
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
 
         <div className="flex flex-col gap-8">
@@ -177,7 +197,15 @@ export function Footer() {
             <ul className="flex gap-2.5">
               {SOCIAL.map((social) => (
                 <li key={social.name}>
-                  <img src={social.icon} alt={social.name} width={30} height={30} loading="lazy" />
+                  <a
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`${social.name} (abre em nova aba)`}
+                    className="block transition-opacity hover:opacity-80"
+                  >
+                    <img src={social.icon} alt="" width={30} height={30} loading="lazy" />
+                  </a>
                 </li>
               ))}
             </ul>

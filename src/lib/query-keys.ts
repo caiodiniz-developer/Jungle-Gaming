@@ -19,6 +19,7 @@ export const queryKeys = {
   cart: (sessionKey: string) => ["cart", sessionKey] as const,
   quotes: (sessionKey: string) => ["quote", sessionKey] as const,
   quote: (sessionKey: string, network: Network) => ["quote", sessionKey, network] as const,
+  orders: (sessionKey: string) => ["orders", sessionKey, "list"] as const,
   order: (sessionKey: string, orderId: string) => ["orders", sessionKey, orderId] as const,
 };
 

@@ -59,8 +59,10 @@ function applyNftUpdate(queryClient: QueryClient, event: NftUpdatedEvent) {
  */
 function applyOrderUpdate(queryClient: QueryClient, event: OrderUpdatedEvent) {
   const { order } = event.data;
-  const orderKey = queryKeys.order(getSessionToken() ?? GUEST_SESSION_KEY, order.id);
+  const sessionKey = getSessionToken() ?? GUEST_SESSION_KEY;
+  const orderKey = queryKeys.order(sessionKey, order.id);
   queryClient.setQueryData<Order>(orderKey, order);
+  void queryClient.invalidateQueries({ queryKey: queryKeys.orders(sessionKey) });
 
   // quem não está na página do pedido é avisado do resultado
   const watching = (queryClient.getQueryCache().find({ queryKey: orderKey })?.getObserversCount() ?? 0) > 0;

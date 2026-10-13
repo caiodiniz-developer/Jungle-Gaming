@@ -28,7 +28,7 @@ import { useSession } from "@/features/auth/session";
 import { QuoteSummary } from "@/features/cart/quote-summary";
 import { useCart, useQuote } from "@/features/cart/use-cart";
 import { clearOrderAttempt } from "@/features/checkout/order-attempt";
-import { useConnectWallet, useSubmitOrder } from "@/features/checkout/use-checkout";
+import { useConnectWallet, useDisconnectWallet, useSubmitOrder } from "@/features/checkout/use-checkout";
 import { formatEthLabel, shortenHash } from "@/lib/eth";
 import { applyApiError } from "@/lib/form-errors";
 import type { ApiError } from "@/lib/http";
@@ -145,6 +145,7 @@ function CheckoutForm({ user, wallets, cartIsEmpty }: CheckoutFormProps) {
   const queryClient = useQueryClient();
   const sessionKey = useSessionKey();
   const connect = useConnectWallet();
+  const disconnect = useDisconnectWallet();
   const order = useSubmitOrder();
 
   const initialWallet = wallets.find((wallet) => wallet.kind === "primary") ?? wallets[0];
@@ -519,9 +520,24 @@ function CheckoutForm({ user, wallets, cartIsEmpty }: CheckoutFormProps) {
 
           <div className="flex flex-col gap-2">
             {connected && selectedWallet ? (
-              <p role="status" className="text-sm leading-5 text-sand">
-                <span className="font-bold text-foreground">Carteira conectada:</span> {selectedWallet.alias} ·{" "}
-                {WALLET_PROVIDER_LABELS[provider]} · {NETWORK_LABELS[network]}
+              <p role="status" className="flex flex-wrap items-baseline justify-between gap-x-3 text-sm leading-5 text-sand">
+                <span>
+                  <span className="font-bold text-foreground">Carteira conectada:</span> {selectedWallet.alias} ·{" "}
+                  {WALLET_PROVIDER_LABELS[provider]} · {NETWORK_LABELS[network]}
+                </span>
+                <button
+                  type="button"
+                  disabled={disconnect.isPending}
+                  onClick={() =>
+                    disconnect.mutate(walletId, {
+                      onSuccess: () => setConnection(null),
+                      onError: (error) => !error.isAuthError && toast.error(error.message),
+                    })
+                  }
+                  className="font-bold text-highlight underline underline-offset-2 disabled:opacity-50"
+                >
+                  Desconectar
+                </button>
               </p>
             ) : (
               <Button

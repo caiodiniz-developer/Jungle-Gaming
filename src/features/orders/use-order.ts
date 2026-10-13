@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Order } from "@/api/contracts";
-import { getOrder } from "@/api/orders";
+import { getOrder, listOrders } from "@/api/orders";
 import { queryKeys } from "@/lib/query-keys";
 import { useSessionKey } from "@/lib/use-session-token";
 import { eventGate } from "@/realtime/gate";
@@ -28,5 +28,14 @@ export function useOrder(orderId: string) {
       return cached && cached.version > order.version ? cached : order;
     },
     refetchInterval: (query) => (query.state.data?.status === "pending" ? PENDING_POLL_MS : false),
+  });
+}
+
+/** Pedidos do usuário, do mais recente ao mais antigo (Atividade e Arquivos baixados). */
+export function useOrders() {
+  const sessionKey = useSessionKey();
+  return useQuery({
+    queryKey: queryKeys.orders(sessionKey),
+    queryFn: async ({ signal }) => (await listOrders({ signal })).items,
   });
 }

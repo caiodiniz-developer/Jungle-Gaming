@@ -253,7 +253,7 @@ const POSTS: { date: string; read: string; title: string; text: string; artwork:
   },
 ];
 
-/** Os artigos são editoriais (fora do escopo): o card mostra o resumo, sem link para leitura. */
+/** Cards do "Diário da Cunhagem"; "Ler mais" leva à página Aprenda. */
 export function Blog() {
   return (
     <section aria-labelledby="blog-title" className="container-page flex flex-col items-center gap-10">
@@ -281,6 +281,10 @@ export function Blog() {
               </p>
               <h3 className="text-base font-bold">{post.title}</h3>
               <p className="text-xs leading-4 font-medium text-sand">{post.text}</p>
+              <Link to="/aprenda" className="mt-auto text-xs leading-[14px] font-bold text-highlight hover:underline">
+                Ler mais <span aria-hidden="true">→</span>
+                <span className="sr-only">: {post.title}</span>
+              </Link>
             </div>
           </li>
         ))}

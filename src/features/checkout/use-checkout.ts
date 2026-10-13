@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ConnectWalletRequest, CreateOrderRequest, Order } from "@/api/contracts";
 import { createOrder } from "@/api/orders";
-import { connectWallet } from "@/api/wallets";
+import { connectWallet, disconnectWallet } from "@/api/wallets";
 import { clearOrderAttempt, idempotencyKeyFor } from "@/features/checkout/order-attempt";
 import { queryKeys } from "@/lib/query-keys";
 import { useSessionKey } from "@/lib/use-session-token";
@@ -13,6 +13,10 @@ export function useConnectWallet() {
     mutationFn: ({ walletId, ...body }: ConnectWalletRequest & { walletId: string }) =>
       connectWallet(walletId, body),
   });
+}
+
+export function useDisconnectWallet() {
+  return useMutation({ mutationFn: (walletId: string) => disconnectWallet(walletId) });
 }
 
 /**
@@ -27,6 +31,7 @@ export function useSubmitOrder() {
     onSuccess: (order) => {
       clearOrderAttempt();
       eventGate.observe("order", order.id, order.version);
+      void queryClient.invalidateQueries({ queryKey: queryKeys.orders(sessionKey) });
       // um order.updated pode ter chegado antes desta resposta: o estado mais novo fica
       queryClient.setQueryData<Order>(queryKeys.order(sessionKey, order.id), (cached) =>
         cached && cached.version > order.version ? cached : order,

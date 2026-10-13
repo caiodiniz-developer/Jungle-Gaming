@@ -16,13 +16,17 @@ import { useLogout, useSession } from "@/features/auth/session";
 import { useCart } from "@/features/cart/use-cart";
 import { cn } from "@/lib/utils";
 
-type Section = "inicio" | "mercado";
+type Section = "inicio" | "mercado" | "criadores" | "aprenda";
 
 /** Telas do fluxo de compra destacam "Mercado"; as demais destacam "Início" (regra do Figma). */
 const MARKET_PATHS = ["/nft", "/carrinho", "/pagamento", "/pedidos"];
 
 function useActiveSection(): Section {
-  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const { pathname, hash } = useRouterState({ select: (state) => state.location });
+  // "Mercado" leva ao catálogo da página inicial: lá, o item ativo acompanha a âncora
+  if (pathname === "/" && hash === "catalogo") return "mercado";
+  if (pathname.startsWith("/criadores")) return "criadores";
+  if (pathname.startsWith("/aprenda")) return "aprenda";
   return MARKET_PATHS.some((path) => pathname.startsWith(path)) ? "mercado" : "inicio";
 }
 
@@ -37,6 +41,8 @@ function NavItem({
   return (
     <Link
       {...linkProps}
+      // o estado ativo é o calculado acima; sem isto o roteador marcaria os dois links de "/"
+      activeOptions={{ exact: true, includeHash: true }}
       aria-current={active ? "page" : undefined}
       className={cn(
         "flex flex-col gap-6 text-base leading-[21px] transition-colors hover:text-highlight",
@@ -46,19 +52,6 @@ function NavItem({
       {children}
       <span aria-hidden="true" className={cn("h-[3px] w-full", active && "bg-primary")} />
     </Link>
-  );
-}
-
-/** Seções editoriais estão fora do escopo da entrega: aparecem como no layout, sem navegar. */
-function NavPlaceholder({ children }: { children: React.ReactNode }) {
-  return (
-    <span
-      aria-disabled="true"
-      title="Seção fora do escopo desta entrega"
-      className="cursor-not-allowed text-base leading-[21px] text-foreground/60"
-    >
-      {children}
-    </span>
   );
 }
 
@@ -185,7 +178,7 @@ function AccountControl() {
 export function Header() {
   const section = useActiveSection();
   // a linha sob o header existe só nas telas em que "Início" está ativo
-  const withDivider = section === "inicio";
+  const withDivider = section !== "mercado";
   const cartCount = useCart().data?.itemCount ?? 0;
 
   return (
@@ -206,8 +199,12 @@ export function Header() {
           <NavItem to="/" hash="catalogo" active={section === "mercado"}>
             Mercado
           </NavItem>
-          <NavPlaceholder>Criadores</NavPlaceholder>
-          <NavPlaceholder>Aprenda</NavPlaceholder>
+          <NavItem to="/criadores" active={section === "criadores"}>
+            Criadores
+          </NavItem>
+          <NavItem to="/aprenda" active={section === "aprenda"}>
+            Aprenda
+          </NavItem>
         </nav>
 
         <div className="flex h-[35px] items-center gap-7">

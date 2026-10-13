@@ -30,6 +30,9 @@ export function MobileTabBar() {
   const signedIn = useSessionToken() !== null;
   const visible = useShowMobileTabBar();
 
+  const accountActive =
+    (pathname.startsWith("/conta") && !pathname.startsWith("/conta/favoritos")) || pathname === "/entrar";
+
   const color = (active: boolean) => (active ? "text-highlight" : "text-sand");
 
   if (!visible) return null;
@@ -69,15 +72,14 @@ export function MobileTabBar() {
           </Link>
         </li>
         <li className="mr-[22%]">
-          <span
-            role="link"
-            aria-disabled="true"
-            aria-label="Favoritos (indisponível)"
-            title="Lista de favoritos fora do escopo desta entrega"
-            className={cn(item, "cursor-not-allowed text-sand/50")}
+          <Link
+            to="/conta/favoritos"
+            aria-label="Lista de interesse"
+            aria-current={pathname.startsWith("/conta/favoritos") ? "page" : undefined}
+            className={cn(item, color(pathname.startsWith("/conta/favoritos")))}
           >
             <Icon src={heartIcon} className="size-5" />
-          </span>
+          </Link>
         </li>
         <li>
           <Link
@@ -101,8 +103,8 @@ export function MobileTabBar() {
           <Link
             to={signedIn ? "/conta/perfil" : "/entrar"}
             aria-label={signedIn ? "Minha conta" : "Entrar"}
-            aria-current={pathname.startsWith("/conta") || pathname === "/entrar" ? "page" : undefined}
-            className={cn(item, color(pathname.startsWith("/conta") || pathname === "/entrar"))}
+            aria-current={accountActive ? "page" : undefined}
+            className={cn(item, color(accountActive))}
           >
             <Icon src={userIcon} className="size-5" />
           </Link>
