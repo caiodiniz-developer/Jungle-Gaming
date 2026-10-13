@@ -148,10 +148,10 @@ Audita início e detalhe do NFT, nos perfis mobile e desktop, três vezes cada, 
 
 | Página | Perfil | Performance | Accessibility | Best Practices | SEO |
 | --- | --- | --- | --- | --- | --- |
-| Início | desktop | 99 | 100 | 100 | 100 |
-| Detalhes do NFT | desktop | 99 | 100 | 100 | 100 |
-| Início | mobile | 84 | 100 | 100 | 100 |
-| Detalhes do NFT | mobile | 85 | 100 | 100 | 100 |
+| Início | desktop | 98 | 100 | 100 | 100 |
+| Detalhes do NFT | desktop | 98 | 100 | 100 | 100 |
+| Início | mobile | 82 | 100 | 100 | 100 |
+| Detalhes do NFT | mobile | 83 | 100 | 100 | 100 |
 
 Performance no perfil mobile fica abaixo da meta de 90. As causas, o que foi tentado e o que fecharia a diferença estão em [docs/lighthouse/ANALISE.md](docs/lighthouse/ANALISE.md); LCP, CLS, TBT, ambiente e versões estão em [docs/lighthouse/README.md](docs/lighthouse/README.md).
 

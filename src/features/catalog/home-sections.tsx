@@ -6,6 +6,7 @@ import promoMask from "@/assets/icons/promo-mask.svg";
 import { Icon } from "@/components/icon";
 import { NftImage } from "@/components/nft-image";
 import { HeroMaskMobile } from "@/features/catalog/hero-mask-mobile";
+import { useIsDesktop } from "@/lib/use-media-query";
 import { cn } from "@/lib/utils";
 import { Reveal } from "@/components/reveal";
 
@@ -60,99 +61,101 @@ export function Hero() {
     setSwitched(true);
   };
   const slide = HERO_SLIDES[active] ?? HERO_SLIDES[0]!;
+  const isDesktop = useIsDesktop();
 
   return (
     <section aria-labelledby="hero-title" className="container-page">
-      {/* desktop */}
-      <div className="hidden h-[450px] items-center justify-between pl-10 lg:flex">
-        <div className="flex w-[600px] flex-col items-end gap-11">
-          <div className="flex w-full flex-col items-start gap-8">
-            <div className="flex flex-col gap-1">
-              <p className="text-sm leading-4 font-medium tracking-[1.4px]">Bem-vindo à Kurio</p>
-              <h1 id="hero-title" className="mt-1 text-[43px] leading-[70px] font-bold">
-                SEJA DONO DO FUTURO
-                <br />
-                DA ARTE DIGITAL
-              </h1>
-              <p className="max-w-[557px] text-sm leading-6 text-sand">
-                Descubra NFTs selecionados de criadores emergentes e consagrados. Colecione arte
-                digital rara, apoie artistas e tenha uma parte da cultura da internet.
-              </p>
+      {/* só uma das variantes é montada: a outra carregaria uma imagem que não aparece */}
+      {isDesktop ? (
+        <div className="flex h-[450px] items-center justify-between pl-10">
+          <div className="flex w-[600px] flex-col items-end gap-11">
+            <div className="flex w-full flex-col items-start gap-8">
+              <div className="flex flex-col gap-1">
+                <p className="text-sm leading-4 font-medium tracking-[1.4px]">Bem-vindo à Kurio</p>
+                <h1 id="hero-title" className="mt-1 text-[43px] leading-[70px] font-bold">
+                  SEJA DONO DO FUTURO
+                  <br />
+                  DA ARTE DIGITAL
+                </h1>
+                <p className="max-w-[557px] text-sm leading-6 text-sand">
+                  Descubra NFTs selecionados de criadores emergentes e consagrados. Colecione arte
+                  digital rara, apoie artistas e tenha uma parte da cultura da internet.
+                </p>
+              </div>
+              <Link
+                to="/"
+                hash="catalogo"
+                className="flex h-10 w-[140px] items-center justify-center rounded-md bg-primary text-base leading-5 font-bold text-ink transition-colors hover:bg-highlight"
+              >
+                EXPLORAR
+              </Link>
             </div>
-            <Link
-              to="/"
-              hash="catalogo"
-              className="flex h-10 w-[140px] items-center justify-center rounded-md bg-primary text-base leading-5 font-bold text-ink transition-colors hover:bg-highlight"
-            >
-              EXPLORAR
-            </Link>
-          </div>
-          <SlideDots active={active} onSelect={select} />
-        </div>
-        <Link
-          to="/nft/$nftId"
-          params={{ nftId: slide.nftId }}
-          aria-label={`Ver ${slide.name}`}
-          className="shrink-0 rounded-3xl"
-        >
-          <NftImage
-            key={slide.artwork}
-            artwork={slide.artwork}
-            alt={slide.name}
-            size={450}
-            priority
-            className={cn("rounded-3xl", switched && "animate-fade")}
-          />
-        </Link>
-      </div>
-
-      {/* mobile */}
-      <div className="relative flex min-h-[190px] flex-col items-center justify-center gap-2.5 overflow-hidden rounded-xl bg-surface p-4 lg:hidden">
-        <HeroMaskMobile className="pointer-events-none absolute inset-0 size-full opacity-10" />
-        <div className="relative flex w-full items-center gap-2">
-          <div className="flex min-w-0 flex-1 flex-col items-start gap-1.5">
-            <p className="text-xs leading-4 font-medium">Bem-vindo à Kurio</p>
-            <p className="text-lg leading-[29px] font-bold" aria-hidden="true">
-              SEJA DONO DA
-              <br />
-              CULTURA DIGITAL
-            </p>
-            <p className="text-xs leading-[18px] text-sand">
-              Descubra NFTs selecionados de criadores do mundo todo.
-            </p>
-            <Link
-              to="/"
-              hash="catalogo"
-              className="flex items-center gap-2 text-xs leading-[14px] font-bold text-highlight"
-            >
-              EXPLORAR
-              <Icon src={arrowRightIcon} className="size-3 -rotate-90" />
-            </Link>
+            <SlideDots active={active} onSelect={select} />
           </div>
           <Link
             to="/nft/$nftId"
             params={{ nftId: slide.nftId }}
             aria-label={`Ver ${slide.name}`}
-            className="relative shrink-0"
+            className="shrink-0 rounded-3xl"
           >
             <NftImage
               key={slide.artwork}
               artwork={slide.artwork}
               alt={slide.name}
-              size={138}
+              size={450}
               priority
-              className={cn("rounded-2xl", switched && "animate-fade")}
-            />
-            <NftImage
-              artwork={(HERO_SLIDES[(active + 1) % HERO_SLIDES.length] ?? slide).artwork}
-              alt=""
-              size={58}
-              className="absolute top-[88px] left-3.5 rounded-2xl"
+              className={cn("rounded-3xl", switched && "animate-fade")}
             />
           </Link>
         </div>
-        <SlideDots active={active} onSelect={select} className="relative" />
-      </div>
+      ) : (
+        <div className="relative flex min-h-[190px] flex-col items-center justify-center gap-2.5 overflow-hidden rounded-xl bg-surface p-4">
+          <HeroMaskMobile className="pointer-events-none absolute inset-0 size-full opacity-10" />
+          <div className="relative flex w-full items-center gap-2">
+            <div className="flex min-w-0 flex-1 flex-col items-start gap-1.5">
+              <p className="text-xs leading-4 font-medium">Bem-vindo à Kurio</p>
+              <h1 id="hero-title" className="text-lg leading-[29px] font-bold">
+                SEJA DONO DA
+                <br />
+                CULTURA DIGITAL
+              </h1>
+              <p className="text-xs leading-[18px] text-sand">
+                Descubra NFTs selecionados de criadores do mundo todo.
+              </p>
+              <Link
+                to="/"
+                hash="catalogo"
+                className="flex items-center gap-2 text-xs leading-[14px] font-bold text-highlight"
+              >
+                EXPLORAR
+                <Icon src={arrowRightIcon} className="size-3 -rotate-90" />
+              </Link>
+            </div>
+            <Link
+              to="/nft/$nftId"
+              params={{ nftId: slide.nftId }}
+              aria-label={`Ver ${slide.name}`}
+              className="relative shrink-0"
+            >
+              <NftImage
+                key={slide.artwork}
+                artwork={slide.artwork}
+                alt={slide.name}
+                size={138}
+                priority
+                className={cn("rounded-2xl", switched && "animate-fade")}
+              />
+              <NftImage
+                artwork={(HERO_SLIDES[(active + 1) % HERO_SLIDES.length] ?? slide).artwork}
+                alt=""
+                size={58}
+                className="absolute top-[88px] left-3.5 rounded-2xl"
+              />
+            </Link>
+          </div>
+          <SlideDots active={active} onSelect={select} className="relative" />
+        </div>
+      )}
     </section>
   );
 }

@@ -232,7 +232,7 @@ Ajustes em relação ao layout, feitos por acessibilidade:
 
 ## 11. Limitações
 
-- **Performance no perfil mobile do Lighthouse fica em 84–85**, abaixo da meta de 90. Causas e tentativas em [docs/lighthouse/ANALISE.md](docs/lighthouse/ANALISE.md).
+- **Performance no perfil mobile do Lighthouse fica em 82–83**, abaixo da meta de 90. Causas e tentativas em [docs/lighthouse/ANALISE.md](docs/lighthouse/ANALISE.md).
 - Não há backend: os dados vivem no navegador de quem acessa. Limpar os dados do site ou usar `?reset-mocks` volta ao estado inicial.
 - O estado da conexão da carteira fica na tela de pagamento; ao recarregar, é preciso conectar de novo.
 - As baselines da regressão visual são específicas do sistema operacional (as versionadas são do Windows).
