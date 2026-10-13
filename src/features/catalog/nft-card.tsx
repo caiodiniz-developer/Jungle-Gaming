@@ -52,7 +52,10 @@ export function NftCard({ nft, priority = false, compact = false, className }: N
           size={compact ? 213 : 250}
           sizes={compact ? "(min-width: 1024px) 213px, 45vw" : "(min-width: 1024px) 250px, 45vw"}
           priority={priority}
-          className={cn("w-[96%] rounded-2xl lg:rounded-[15px]", !nft.available && "opacity-45 grayscale")}
+          className={cn(
+            "w-[96%] rounded-2xl transition-[scale] duration-500 ease-kurio group-hover:scale-[1.04] lg:rounded-[15px]",
+            !nft.available && "opacity-45 grayscale",
+          )}
         />
 
         {nft.rare && (

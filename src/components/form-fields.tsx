@@ -43,7 +43,7 @@ function FieldShell({ id, label, required, hideLabel, error, hint, className, ch
       )}
       {error && (
         // o ícone textual "Erro:" (só para leitores de tela) evita depender da cor
-        <p id={`${id}-error`} role="alert" className="mt-1.5 text-xs leading-4 text-coral">
+        <p id={`${id}-error`} role="alert" className="mt-1.5 animate-tick text-xs leading-4 text-coral">
           <span className="sr-only">Erro: </span>
           {error}
         </p>
@@ -217,7 +217,10 @@ export function SelectField({
 export function FormMessage({ message }: { message: string | null }) {
   if (!message) return null;
   return (
-    <p role="alert" className="rounded-sm border border-coral/60 bg-coral/10 px-3 py-2 text-sm leading-5 text-foreground">
+    <p
+      role="alert"
+      className="animate-tick rounded-sm border border-coral/60 bg-coral/10 px-3 py-2 text-sm leading-5 text-foreground"
+    >
       <span className="sr-only">Erro: </span>
       {message}
     </p>

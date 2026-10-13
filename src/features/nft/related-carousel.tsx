@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { NftSummary } from "@/api/contracts";
 import { NftCard } from "@/features/catalog/nft-card";
 import { cn } from "@/lib/utils";
+import { Reveal } from "@/components/reveal";
 
 type RelatedCarouselProps = {
   title: string;
@@ -43,7 +44,7 @@ export function RelatedCarousel({ title, nfts }: RelatedCarouselProps) {
   if (nfts.length === 0) return null;
 
   return (
-    <section aria-label={title} className="flex flex-col gap-8">
+    <Reveal as="section" aria-label={title} className="flex flex-col gap-8">
       <div className="flex flex-col gap-3">
         <h2 className="text-[17px] leading-4 font-bold text-highlight">{title}</h2>
         <div className="hairline" />
@@ -84,6 +85,6 @@ export function RelatedCarousel({ title, nfts }: RelatedCarouselProps) {
           ))}
         </div>
       )}
-    </section>
+    </Reveal>
   );
 }

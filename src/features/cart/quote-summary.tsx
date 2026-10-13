@@ -4,6 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { formatEth, formatEthLabel, isZeroEth } from "@/lib/eth";
 import type { ApiError } from "@/lib/http";
 import { cn } from "@/lib/utils";
+import { FlashOnChange } from "@/components/flash-on-change";
 
 type QuoteSummaryProps = {
   quote: Quote | undefined;
@@ -74,7 +75,7 @@ export function QuoteSummary({ quote, error, onRetry, updating = false, classNam
       <div className="flex items-baseline justify-between gap-4 pt-2">
         <dt className="text-base font-bold">Total</dt>
         <dd data-testid="quote-total" className="text-lg leading-6 font-bold text-highlight">
-          {formatEthLabel(quote.total)}
+          <FlashOnChange value={quote.total}>{formatEthLabel(quote.total)}</FlashOnChange>
         </dd>
       </div>
     </dl>

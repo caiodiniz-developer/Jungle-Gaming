@@ -1,4 +1,4 @@
-import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
+import { createRootRouteWithContext, Outlet, useRouterState } from "@tanstack/react-router";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 import { MobileTabBar } from "@/components/layout/mobile-tab-bar";
@@ -20,6 +20,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
  */
 function RootLayout() {
   const hasTabBar = useShowMobileTabBar();
+  const section = useRouterState({ select: (state) => state.location.pathname.split("/")[1] ?? "" });
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -31,7 +32,10 @@ function RootLayout() {
       </a>
       <Header />
       <main id="conteudo" tabIndex={-1} className={cn("flex-1 outline-none", hasTabBar && "max-lg:pb-[110px]")}>
-        <Outlet />
+        {/* fade a cada troca de seção; só opacidade, para não deslocar as barras fixas */}
+        <div key={section} className="animate-fade">
+          <Outlet />
+        </div>
       </main>
       <div className="hidden lg:block">
         <Footer />

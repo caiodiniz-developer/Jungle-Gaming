@@ -50,7 +50,7 @@ function NavItem({
       )}
     >
       {children}
-      <span aria-hidden="true" className={cn("h-[3px] w-full", active && "bg-primary")} />
+      <span aria-hidden="true" data-active={active} className="underline-grow h-[3px] w-full bg-primary" />
     </Link>
   );
 }
@@ -220,8 +220,9 @@ export function Header() {
             <Icon src={cartIcon} className="size-6" />
             {cartCount > 0 && (
               <span
+                key={cartCount}
                 aria-hidden="true"
-                className="absolute -top-0.5 left-[13px] flex size-5 items-center justify-center rounded-full border-2 border-ink bg-primary text-[10px] leading-none font-medium text-ink"
+                className="animate-bump absolute -top-0.5 left-[13px] flex size-5 items-center justify-center rounded-full border-2 border-ink bg-primary text-[10px] leading-none font-medium text-ink"
               >
                 {cartCount > 99 ? "99+" : cartCount}
               </span>

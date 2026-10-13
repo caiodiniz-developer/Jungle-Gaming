@@ -7,6 +7,7 @@ import promoMask from "@/assets/icons/promo-mask.svg";
 import { Icon } from "@/components/icon";
 import { NftImage } from "@/components/nft-image";
 import { cn } from "@/lib/utils";
+import { Reveal } from "@/components/reveal";
 
 const HERO_SLIDES: { nftId: string; name: string; artwork: Artwork }[] = [
   { nftId: "nft-0042", name: "Emerald Ape #042", artwork: "emerald-ape" },
@@ -37,8 +38,8 @@ function SlideDots({
         >
           <span
             className={cn(
-              "size-2 rounded-full bg-primary transition-opacity",
-              index === active ? "opacity-100 ring-2 ring-primary/40" : "opacity-50",
+              "size-2 rounded-full bg-primary transition-[opacity,scale,box-shadow] duration-300 ease-kurio",
+              index === active ? "scale-125 opacity-100 ring-2 ring-primary/40" : "opacity-50",
             )}
           />
         </button>
@@ -49,6 +50,12 @@ function SlideDots({
 
 export function Hero() {
   const [active, setActive] = useState(0);
+  // a troca de destaque faz fade; a primeira imagem aparece direto (é o maior elemento da página)
+  const [switched, setSwitched] = useState(false);
+  const select = (index: number) => {
+    setActive(index);
+    setSwitched(true);
+  };
   const slide = HERO_SLIDES[active] ?? HERO_SLIDES[0]!;
 
   return (
@@ -77,7 +84,7 @@ export function Hero() {
               EXPLORAR
             </Link>
           </div>
-          <SlideDots active={active} onSelect={setActive} />
+          <SlideDots active={active} onSelect={select} />
         </div>
         <Link
           to="/nft/$nftId"
@@ -85,7 +92,14 @@ export function Hero() {
           aria-label={`Ver ${slide.name}`}
           className="shrink-0 rounded-3xl"
         >
-          <NftImage artwork={slide.artwork} alt={slide.name} size={450} priority className="rounded-3xl" />
+          <NftImage
+            key={slide.artwork}
+            artwork={slide.artwork}
+            alt={slide.name}
+            size={450}
+            priority
+            className={cn("rounded-3xl", switched && "animate-fade")}
+          />
         </Link>
       </div>
 
@@ -123,7 +137,14 @@ export function Hero() {
             aria-label={`Ver ${slide.name}`}
             className="relative shrink-0"
           >
-            <NftImage artwork={slide.artwork} alt={slide.name} size={138} priority className="rounded-2xl" />
+            <NftImage
+              key={slide.artwork}
+              artwork={slide.artwork}
+              alt={slide.name}
+              size={138}
+              priority
+              className={cn("rounded-2xl", switched && "animate-fade")}
+            />
             <NftImage
               artwork={(HERO_SLIDES[(active + 1) % HERO_SLIDES.length] ?? slide).artwork}
               alt=""
@@ -132,7 +153,7 @@ export function Hero() {
             />
           </Link>
         </div>
-        <SlideDots active={active} onSelect={setActive} className="relative" />
+        <SlideDots active={active} onSelect={select} className="relative" />
       </div>
     </section>
   );
@@ -181,8 +202,10 @@ const PROMOS: {
 export function Promos() {
   return (
     <section aria-label="Promoções" className="container-page grid gap-7 lg:grid-cols-2">
-      {PROMOS.map((promo) => (
-        <article
+      {PROMOS.map((promo, index) => (
+        <Reveal
+          as="article"
+          index={index}
           key={promo.artwork}
           className="relative flex min-h-[200px] items-stretch overflow-hidden rounded-lg bg-surface lg:h-[250px]"
         >
@@ -216,7 +239,7 @@ export function Promos() {
               <Icon src={arrowRightIcon} className="size-3.5 -rotate-90" />
             </Link>
           </div>
-        </article>
+        </Reveal>
       ))}
     </section>
   );
@@ -266,8 +289,13 @@ export function Blog() {
         </p>
       </div>
       <ul className="grid w-full gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {POSTS.map((post) => (
-          <li key={post.title} className="flex flex-col overflow-hidden rounded-lg bg-surface">
+        {POSTS.map((post, index) => (
+          <Reveal
+            as="li"
+            index={index}
+            key={post.title}
+            className="flex flex-col overflow-hidden rounded-lg bg-surface"
+          >
             <NftImage
               artwork={post.artwork}
               alt=""
@@ -286,7 +314,7 @@ export function Blog() {
                 <span className="sr-only">: {post.title}</span>
               </Link>
             </div>
-          </li>
+          </Reveal>
         ))}
       </ul>
     </section>

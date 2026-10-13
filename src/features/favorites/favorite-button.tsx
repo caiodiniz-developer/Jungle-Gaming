@@ -34,7 +34,11 @@ export function FavoriteButton({ nft, variant = "icon", className }: FavoriteBut
           className,
         )}
       >
-        <Icon src={isFavorite ? heartFilledIcon : heartIcon} className="size-5" />
+        <Icon
+          key={String(isFavorite)}
+          src={isFavorite ? heartFilledIcon : heartIcon}
+          className={cn("size-5", isFavorite && "animate-pop")}
+        />
         {isFavorite ? "Favorito" : "Favoritar"}
       </button>
     );
@@ -51,7 +55,11 @@ export function FavoriteButton({ nft, variant = "icon", className }: FavoriteBut
         className,
       )}
     >
-      <Icon src={isFavorite ? heartFilledIcon : heartIcon} className="size-4" />
+      <Icon
+        key={String(isFavorite)}
+        src={isFavorite ? heartFilledIcon : heartIcon}
+        className={cn("size-4", isFavorite && "animate-pop")}
+      />
     </button>
   );
 }

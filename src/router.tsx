@@ -14,6 +14,10 @@ export function createAppRouter(context: RouterContext) {
     // o cache é do TanStack Query; o router não mantém cópia própria dos dados
     defaultPreloadStaleTime: 0,
     scrollRestoration: true,
+    // âncoras rolam com suavidade, exceto para quem pede menos movimento
+    defaultHashScrollIntoView: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      ? true
+      : { behavior: "smooth" },
   });
 }
 

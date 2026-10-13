@@ -41,7 +41,7 @@ export function CatalogTabs({ search }: Pick<CatalogToolbarProps, "search">) {
                 )}
               >
                 {tab.label}
-                <span aria-hidden="true" className={cn("h-0.5 w-full", isActive && "bg-primary")} />
+                <span aria-hidden="true" data-active={isActive} className="underline-grow h-0.5 w-full bg-primary" />
               </Link>
             </li>
           );

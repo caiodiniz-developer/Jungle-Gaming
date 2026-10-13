@@ -20,6 +20,7 @@ import { RelatedCarousel } from "@/features/nft/related-carousel";
 import { formatEthLabel } from "@/lib/eth";
 import { useIsDesktop } from "@/lib/use-media-query";
 import { cn } from "@/lib/utils";
+import { FlashOnChange } from "@/components/flash-on-change";
 
 function Rating({ rating, compact = false }: { rating: NftDetail["rating"]; compact?: boolean }) {
   const average = rating.average.toFixed(1).replace(".", ",");
@@ -258,7 +259,7 @@ export function NftDetailView({ nft }: { nft: NftDetail }) {
               />
             </div>
             <p data-testid="nft-price" className="text-xl leading-4 font-bold text-highlight">
-              {formatEthLabel(nft.price)}
+              <FlashOnChange value={nft.price}>{formatEthLabel(nft.price)}</FlashOnChange>
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -312,7 +313,7 @@ export function NftDetailView({ nft }: { nft: NftDetail }) {
             <h1 className="text-[28px] font-bold">{nft.name}</h1>
             <div className="flex flex-wrap items-center justify-between gap-3">
               <p data-testid="nft-price" className="text-[22px] leading-4 font-bold text-highlight">
-                {formatEthLabel(nft.price)}
+                <FlashOnChange value={nft.price}>{formatEthLabel(nft.price)}</FlashOnChange>
                 {nft.previousPrice && (
                   <span className="ml-3 text-lg font-normal text-subtle">
                     <span className="sr-only">Preço anterior: </span>

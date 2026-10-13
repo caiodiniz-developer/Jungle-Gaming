@@ -60,7 +60,9 @@ export function QuantityStepper({
           large ? "text-xl leading-7" : "text-[17px] leading-6",
         )}
       >
-        {value}
+        <span key={value} className="inline-block animate-tick">
+          {value}
+        </span>
       </output>
       <button
         type="button"

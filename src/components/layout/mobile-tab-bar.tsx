@@ -91,8 +91,9 @@ export function MobileTabBar() {
             <Icon src={shopIcon} className="size-5" />
             {cartCount > 0 && (
               <span
+                key={cartCount}
                 aria-hidden="true"
-                className="absolute top-1 right-0 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-primary px-1 text-[10px] leading-none font-medium text-ink"
+                className="animate-bump absolute top-1 right-0 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-primary px-1 text-[10px] leading-none font-medium text-ink"
               >
                 {cartCount > 99 ? "99+" : cartCount}
               </span>

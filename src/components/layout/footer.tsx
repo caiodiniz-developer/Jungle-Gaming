@@ -5,6 +5,7 @@ import instagramIcon from "@/assets/icons/social-instagram.svg";
 import linkedinIcon from "@/assets/icons/social-linkedin.svg";
 import twitterIcon from "@/assets/icons/social-twitter.svg";
 import youtubeIcon from "@/assets/icons/social-youtube.svg";
+import { Reveal } from "@/components/reveal";
 
 const HIGHLIGHTS = [
   {
@@ -110,8 +111,10 @@ export function Footer() {
         className="flex flex-col gap-8 bg-surface p-8 lg:flex-row lg:gap-0"
       >
         <ul className="grid flex-1 gap-8 sm:grid-cols-3 sm:gap-0">
-          {HIGHLIGHTS.map((item) => (
-            <li
+          {HIGHLIGHTS.map((item, index) => (
+            <Reveal
+              as="li"
+              index={index}
               key={item.initial}
               className="flex flex-col gap-3 sm:border-r sm:border-primary sm:px-4 sm:last:border-r-0 lg:last:border-r"
             >
@@ -123,7 +126,7 @@ export function Footer() {
               </span>
               <h3 className="text-[17px] leading-4 font-bold">{item.title}</h3>
               <p className="max-w-[204px] text-sm leading-[22px] text-sand">{item.text}</p>
-            </li>
+            </Reveal>
           ))}
         </ul>
         <Newsletter />

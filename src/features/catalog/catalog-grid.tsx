@@ -90,7 +90,12 @@ export function CatalogGrid({ data, error, isLoading, isRefreshing, filtered, on
       >
         {data.items.map((nft, index) => (
           <li key={nft.id}>
-            <NftCard nft={nft} priority={index < 3} />
+            <div
+              style={{ "--i": index } as React.CSSProperties}
+              className="animate-rise [animation-delay:calc(var(--i)*45ms)]"
+            >
+              <NftCard nft={nft} priority={index < 3} />
+            </div>
           </li>
         ))}
       </ul>

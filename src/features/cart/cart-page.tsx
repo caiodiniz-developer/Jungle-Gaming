@@ -28,6 +28,7 @@ import { RelatedCarousel } from "@/features/nft/related-carousel";
 import { formatEthLabel } from "@/lib/eth";
 import { useIsDesktop } from "@/lib/use-media-query";
 import { cn } from "@/lib/utils";
+import { FlashOnChange } from "@/components/flash-on-change";
 
 /** Colunas da tabela desktop: imagem, NFT, preço, edições, total, remover. */
 const COLUMNS = "lg:grid-cols-[70px_minmax(0,1fr)_100px_100px_110px_24px] lg:gap-x-4 lg:pr-4";
@@ -55,7 +56,7 @@ function CartLineRow({ line }: { line: CartLine }) {
   return (
     <li
       data-testid="cart-line"
-      className="overflow-hidden rounded-[14px] bg-surface lg:overflow-visible lg:rounded-none"
+      className="animate-rise overflow-hidden rounded-[14px] bg-surface lg:overflow-visible lg:rounded-none"
     >
       <div className={cn("grid grid-cols-[100px_minmax(0,1fr)] gap-x-3 lg:items-center", COLUMNS)}>
         <NftImage
@@ -92,7 +93,7 @@ function CartLineRow({ line }: { line: CartLine }) {
             className="order-1 text-lg leading-5 font-bold text-highlight lg:order-2 lg:text-base"
           >
             <span className="sr-only">Total: </span>
-            {formatEthLabel(line.lineTotal)}
+            <FlashOnChange value={line.lineTotal}>{formatEthLabel(line.lineTotal)}</FlashOnChange>
           </p>
           <QuantityStepper
             value={line.quantity}

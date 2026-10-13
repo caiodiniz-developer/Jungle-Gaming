@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import activityIcon from "@/assets/icons/activity.svg";
 import bagIcon from "@/assets/icons/bag.svg";
 import dangerIcon from "@/assets/icons/danger.svg";
@@ -26,6 +26,7 @@ const row = "flex items-center gap-3 border-l-[6px] border-transparent px-4 text
 export function AccountLayout({ children }: { children: React.ReactNode }) {
   const logout = useLogout();
   const navigate = useNavigate();
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
 
   function signOut() {
     logout.mutate(undefined, { onSettled: () => void navigate({ to: "/" }) });
@@ -61,7 +62,9 @@ export function AccountLayout({ children }: { children: React.ReactNode }) {
         </button>
       </nav>
 
-      <div className="min-w-0 flex-1">{children}</div>
+      <div key={pathname} className="min-w-0 flex-1 animate-fade">
+        {children}
+      </div>
     </div>
   );
 }

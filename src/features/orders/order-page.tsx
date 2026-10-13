@@ -27,10 +27,10 @@ function ThankYouIcon() {
       strokeLinejoin="round"
       strokeLinecap="round"
     >
-      <path d="M2 36v42a2 2 0 0 0 2 2h60a2 2 0 0 0 2-2V36" />
-      <path d="M2 78 26 52M66 78 42 52M2 36l32 24 32-24" />
-      <path d="M8 40V10a2 2 0 0 1 2-2h48a2 2 0 0 1 2 2v30" />
-      <path d="M28 8a6 6 0 0 1 12 0" />
+      <path pathLength={1} className="animate-draw [stroke-dasharray:1]" d="M2 36v42a2 2 0 0 0 2 2h60a2 2 0 0 0 2-2V36" />
+      <path pathLength={1} className="animate-draw [stroke-dasharray:1]" d="M2 78 26 52M66 78 42 52M2 36l32 24 32-24" />
+      <path pathLength={1} className="animate-draw [stroke-dasharray:1]" d="M8 40V10a2 2 0 0 1 2-2h48a2 2 0 0 1 2 2v30" />
+      <path pathLength={1} className="animate-draw [stroke-dasharray:1]" d="M28 8a6 6 0 0 1 12 0" />
       <text
         x="34"
         y="24"
@@ -104,7 +104,7 @@ function OrderReceipt({ order }: { order: Order }) {
     <article
       data-testid="order"
       data-status={order.status}
-      className="relative mx-auto w-full max-w-[578px] border-b-[10px] border-primary bg-surface pb-10"
+      className="relative mx-auto w-full max-w-[578px] animate-rise border-b-[10px] border-primary bg-surface pb-10"
     >
       <Link
         to="/"
@@ -116,7 +116,9 @@ function OrderReceipt({ order }: { order: Order }) {
 
       {/* região viva: a mudança de pendente para confirmado/recusado é anunciada */}
       <div role="status" className="flex flex-col items-center gap-3 px-6 pt-6 pb-5 text-center">
-        <StatusHeader order={order} />
+        <div key={order.status} className="flex animate-fade flex-col items-center gap-3">
+          <StatusHeader order={order} />
+        </div>
       </div>
 
       <dl className="grid grid-cols-2 gap-y-4 border-y border-primary px-6 py-4 text-sm leading-[19px] text-sand sm:flex sm:justify-between sm:px-9">

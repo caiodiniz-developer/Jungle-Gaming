@@ -90,6 +90,102 @@
 
   --animate-shimmer: shimmer 1.6s linear infinite;
 
+  /*
+   * Movimento da Kurio: curto, sem ressalto exagerado, sempre desacelerando no
+   * fim. Uma única curva dá a mesma "assinatura" a todas as transições.
+   */
+  --ease-kurio: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* entrada de conteúdo: sobe 12px e aparece */
+  --animate-rise: rise 0.55s var(--ease-kurio) both;
+  /* troca de página ou de conteúdo: só opacidade (não desloca barras fixas) */
+  --animate-fade: fade 0.3s ease-out both;
+  /* resposta a uma ação: favoritar */
+  --animate-pop: pop 0.4s var(--ease-kurio);
+  /* contador que mudou: badge do carrinho */
+  --animate-bump: bump 0.45s var(--ease-kurio);
+  /* número trocado: quantidade */
+  --animate-tick: tick 0.22s var(--ease-kurio);
+  /* valor atualizado pela API ou em tempo real: brilho que se apaga */
+  --animate-flash: flash 1.4s ease-out;
+  /* traço do ícone do recibo sendo desenhado */
+  --animate-draw: draw 1s var(--ease-kurio) 0.15s both;
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      translate: 0 12px;
+    }
+    to {
+      opacity: 1;
+      translate: 0 0;
+    }
+  }
+
+  @keyframes fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes pop {
+    0% {
+      scale: 0.8;
+    }
+    55% {
+      scale: 1.18;
+    }
+    100% {
+      scale: 1;
+    }
+  }
+
+  @keyframes bump {
+    0% {
+      scale: 1;
+    }
+    40% {
+      scale: 1.25;
+    }
+    100% {
+      scale: 1;
+    }
+  }
+
+  @keyframes tick {
+    from {
+      opacity: 0;
+      translate: 0 4px;
+    }
+    to {
+      opacity: 1;
+      translate: 0 0;
+    }
+  }
+
+  @keyframes flash {
+    0% {
+      background-color: rgb(210 138 76 / 0.35);
+      box-shadow: 0 0 0 6px rgb(210 138 76 / 0.35);
+    }
+    100% {
+      background-color: transparent;
+      box-shadow: 0 0 0 6px transparent;
+    }
+  }
+
+  @keyframes draw {
+    from {
+      stroke-dashoffset: 1;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
   @keyframes shimmer {
     from {
       background-position: 200% 0;
@@ -141,6 +237,45 @@
   /* linha fina de 0,3px do Figma; 1px com opacidade mantém a aparência em telas 1x */
   .hairline {
     @apply h-px w-full bg-primary/50;
+  }
+
+  /*
+   * Revelação ao rolar (componente Reveal): o bloco espera 16px abaixo e sobe
+   * quando entra na tela. `--reveal-delay` escalona itens de uma mesma fileira.
+   */
+  .reveal {
+    opacity: 0;
+    translate: 0 16px;
+    transition:
+      opacity 0.6s var(--ease-kurio) var(--reveal-delay, 0ms),
+      translate 0.6s var(--ease-kurio) var(--reveal-delay, 0ms);
+  }
+
+  .reveal[data-revealed="true"] {
+    opacity: 1;
+    translate: 0 0;
+  }
+
+  /* sublinhado que cresce a partir da esquerda (navegação e abas) */
+  .underline-grow {
+    scale: 0 1;
+    transform-origin: left;
+    transition: scale 0.35s var(--ease-kurio);
+  }
+
+  .underline-grow[data-active="true"],
+  a:hover > .underline-grow,
+  a:focus-visible > .underline-grow {
+    scale: 1 1;
+  }
+}
+
+/* quem pede menos movimento vê o conteúdo já no lugar, sem esperar a rolagem */
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    translate: none;
+    transition: none;
   }
 }
 

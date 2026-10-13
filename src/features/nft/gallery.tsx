@@ -42,8 +42,8 @@ export function Gallery({ artwork, name }: GalleryProps) {
               aria-label={`Mostrar ${item.label.toLowerCase()}`}
               aria-pressed={index === active}
               className={cn(
-                "block size-[64px] overflow-hidden rounded-lg border bg-surface lg:size-[100px]",
-                index === active ? "border-primary" : "border-transparent hover:border-border-soft",
+                "block size-[64px] overflow-hidden rounded-lg border bg-surface transition-[border-color,opacity] duration-300 lg:size-[100px]",
+                index === active ? "border-primary" : "border-transparent opacity-75 hover:border-border-soft hover:opacity-100",
               )}
             >
               <span className="block size-full" style={item.style}>
@@ -57,7 +57,7 @@ export function Gallery({ artwork, name }: GalleryProps) {
 
       <div className="relative flex aspect-square w-full max-w-[444px] items-center justify-center rounded-md bg-surface p-4">
         <div className="size-full overflow-hidden rounded-3xl">
-          <div className="size-full transition-transform duration-300" style={view.style}>
+          <div className="size-full transition-transform duration-500 ease-kurio" style={view.style}>
             <NftImage
               artwork={artwork}
               alt={`${name} — ${view.label.toLowerCase()}`}
