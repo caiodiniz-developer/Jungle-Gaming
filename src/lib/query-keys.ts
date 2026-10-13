@@ -1,4 +1,4 @@
-import type { NftListParams } from "@/api/contracts";
+import type { Network, NftListParams } from "@/api/contracts";
 
 /**
  * Chaves de cache do TanStack Query.
@@ -17,6 +17,9 @@ export const queryKeys = {
   favorites: (sessionKey: string) => ["favorites", sessionKey] as const,
   wallets: (sessionKey: string) => ["wallets", sessionKey] as const,
   cart: (sessionKey: string) => ["cart", sessionKey] as const,
+  quotes: (sessionKey: string) => ["quote", sessionKey] as const,
+  quote: (sessionKey: string, network: Network) => ["quote", sessionKey, network] as const,
+  order: (sessionKey: string, orderId: string) => ["orders", sessionKey, orderId] as const,
 };
 
 /** Identificador usado nas chaves de quem ainda não entrou. */

@@ -1,10 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { PagePlaceholder } from "@/components/page-placeholder";
+import { CartPage } from "@/features/cart/cart-page";
 
 export const Route = createFileRoute("/carrinho")({
   component: CartPage,
 });
-
-function CartPage() {
-  return <PagePlaceholder title="Carrinho de NFTs" description="Edição de quantidades, remoção, cupom e resumo de valores." />;
-}

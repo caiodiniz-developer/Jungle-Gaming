@@ -1,9 +1,15 @@
 import { type QueryClient, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { toast } from "sonner";
-import type { NftDetail, NftListResponse, NftUpdatedEvent } from "@/api/contracts";
+import type {
+  NftDetail,
+  NftListResponse,
+  NftUpdatedEvent,
+  Order,
+  OrderUpdatedEvent,
+} from "@/api/contracts";
 import { formatEthLabel } from "@/lib/eth";
-import { queryKeys } from "@/lib/query-keys";
+import { GUEST_SESSION_KEY, queryKeys } from "@/lib/query-keys";
 import { getSessionToken } from "@/lib/session-storage";
 import { useSessionToken } from "@/lib/use-session-token";
 import { eventGate } from "@/realtime/gate";
@@ -44,6 +50,28 @@ function applyNftUpdate(queryClient: QueryClient, event: NftUpdatedEvent) {
   }
 
   void queryClient.invalidateQueries({ queryKey: ["cart"] });
+  void queryClient.invalidateQueries({ queryKey: ["quote"] });
+}
+
+/**
+ * Aplica um order.updated: o pedido em cache passa ao novo estado e o carrinho
+ * é recalculado (a confirmação remove dele os itens comprados).
+ */
+function applyOrderUpdate(queryClient: QueryClient, event: OrderUpdatedEvent) {
+  const { order } = event.data;
+  const orderKey = queryKeys.order(getSessionToken() ?? GUEST_SESSION_KEY, order.id);
+  queryClient.setQueryData<Order>(orderKey, order);
+
+  // quem não está na página do pedido é avisado do resultado
+  const watching = (queryClient.getQueryCache().find({ queryKey: orderKey })?.getObserversCount() ?? 0) > 0;
+  if (!watching && order.status === "confirmed") {
+    toast.success(`Pedido ${order.id} confirmado.`);
+  } else if (!watching && order.status === "rejected") {
+    toast.error(`Pedido ${order.id} recusado.`, { description: order.rejectionReason ?? undefined });
+  }
+
+  void queryClient.invalidateQueries({ queryKey: ["cart"] });
+  void queryClient.invalidateQueries({ queryKey: ["quote"] });
 }
 
 /**
@@ -73,13 +101,20 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
       applyNftUpdate(queryClient, event);
     };
 
+    const onOrderUpdated = (event: OrderUpdatedEvent) => {
+      if (!eventGate.accept(event)) return;
+      applyOrderUpdate(queryClient, event);
+    };
+
     socket.on("connect", onConnect);
     socket.on("nft.updated", onNftUpdated);
+    socket.on("order.updated", onOrderUpdated);
     socket.connect();
 
     return () => {
       socket.off("connect", onConnect);
       socket.off("nft.updated", onNftUpdated);
+      socket.off("order.updated", onOrderUpdated);
       socket.disconnect();
     };
   }, [queryClient]);

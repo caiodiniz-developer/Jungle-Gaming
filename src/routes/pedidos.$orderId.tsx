@@ -1,12 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { PagePlaceholder } from "@/components/page-placeholder";
 import { requireSession } from "@/features/auth/guards";
+import { OrderPage } from "@/features/orders/order-page";
 
 export const Route = createFileRoute("/pedidos/$orderId")({
   beforeLoad: requireSession,
-  component: OrderPage,
+  component: OrderRoute,
 });
 
-function OrderPage() {
-  return <PagePlaceholder title="Confirmação de pedido" description="Resultado, identificação da transação, itens, taxas e total." />;
+function OrderRoute() {
+  const { orderId } = Route.useParams();
+  return <OrderPage orderId={orderId} />;
 }

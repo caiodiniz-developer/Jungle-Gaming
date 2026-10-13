@@ -77,3 +77,8 @@ export function formatEth(value: EthAmount, { minDecimals = 2, maxDecimals = 6 }
 export function formatEthLabel(value: EthAmount): string {
   return `${formatEth(value)} ETH`;
 }
+
+/** Abrevia endereços e hashes como no layout: "0xA91F…E82C". */
+export function shortenHash(value: string): string {
+  return value.length > 12 ? `${value.slice(0, 6)}…${value.slice(-4)}` : value;
+}
