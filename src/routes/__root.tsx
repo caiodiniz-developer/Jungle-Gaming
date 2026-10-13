@@ -1,8 +1,12 @@
 import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
+import { MobileTabBar } from "@/components/layout/mobile-tab-bar";
+import { useShowMobileTabBar } from "@/components/layout/use-show-mobile-tab-bar";
 import { NotFound } from "@/components/not-found";
 import { Toaster } from "@/components/ui/sonner";
+import { SessionWatcher } from "@/features/auth/session-watcher";
+import { cn } from "@/lib/utils";
 import type { RouterContext } from "@/router";
 
 export const Route = createRootRouteWithContext<RouterContext>()({
@@ -10,7 +14,13 @@ export const Route = createRootRouteWithContext<RouterContext>()({
   notFoundComponent: () => <NotFound />,
 });
 
+/**
+ * Duas molduras, seguindo o Figma: a partir de 1024px, header e rodapé; abaixo
+ * disso, as telas ocupam a altura toda e a navegação fica na barra inferior.
+ */
 function RootLayout() {
+  const hasTabBar = useShowMobileTabBar();
+
   return (
     <div className="flex min-h-dvh flex-col">
       <a
@@ -20,10 +30,14 @@ function RootLayout() {
         Pular para o conteúdo
       </a>
       <Header />
-      <main id="conteudo" tabIndex={-1} className="flex-1 outline-none">
+      <main id="conteudo" tabIndex={-1} className={cn("flex-1 outline-none", hasTabBar && "max-lg:pb-[110px]")}>
         <Outlet />
       </main>
-      <Footer />
+      <div className="hidden lg:block">
+        <Footer />
+      </div>
+      <MobileTabBar />
+      <SessionWatcher />
       <Toaster />
     </div>
   );

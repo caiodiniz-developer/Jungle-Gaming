@@ -79,6 +79,8 @@ export type NftSummary = {
   rare: boolean;
   /** Há ao menos uma edição com unidades disponíveis. */
   available: boolean;
+  /** Edição usada ao comprar direto do catálogo; null quando tudo está esgotado. */
+  defaultEditionId: string | null;
   listedAt: string;
   /** Versão do recurso; cresce a cada alteração e ordena os eventos em tempo real. */
   version: number;
