@@ -15,14 +15,14 @@ type IconProps = {
  * Ícones multicoloridos (logos) devem usar `<img>` diretamente.
  */
 export function Icon({ src, className, label }: IconProps) {
-  const mask = `url("${src}") center / contain no-repeat`;
   return (
     <span
       role={label ? "img" : undefined}
       aria-label={label}
       aria-hidden={label ? undefined : true}
-      className={cn("inline-block size-5 shrink-0 bg-current", className)}
-      style={{ mask, WebkitMask: mask } as CSSProperties}
+      className={cn("icon-mask inline-block size-5 shrink-0 bg-current", className)}
+      // o desenho vai numa variável: a regra da máscara fica uma vez só, no CSS
+      style={{ "--icon": `url("${src}")` } as CSSProperties}
     />
   );
 }

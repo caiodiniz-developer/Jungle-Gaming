@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import filterIcon from "@/assets/icons/filter.svg";
 import searchIcon from "@/assets/icons/search-mobile.svg";
 import { Icon } from "@/components/icon";
@@ -26,6 +26,8 @@ import {
   toListParams,
 } from "@/features/catalog/search";
 import { nftListOptions, useNftList } from "@/features/catalog/use-nfts";
+import { isPrerender } from "@/lib/env";
+import { dismissShell } from "@/lib/shell";
 import { useDebouncedValue } from "@/lib/use-debounced-value";
 
 export const Route = createFileRoute("/")({
@@ -80,6 +82,9 @@ function HomePage() {
   const params = toListParams(search);
   const query = useNftList(params);
   const { data } = query;
+
+  // a tela montada é igual à primeira dobra pré-renderizada (banner e grade em carregamento)
+  useLayoutEffect(dismissShell, []);
 
   /** Qualquer mudança de busca, filtro ou ordenação volta para a primeira página. */
   function updateSearch(patch: Partial<CatalogSearch>, options: { replace?: boolean } = {}) {
@@ -201,8 +206,13 @@ function HomePage() {
         </div>
       </section>
 
-      <Promos />
-      <Blog />
+      {/* abaixo da dobra: fica fora do HTML pré-renderizado */}
+      {!isPrerender && (
+        <>
+          <Promos />
+          <Blog />
+        </>
+      )}
     </div>
   );
 }

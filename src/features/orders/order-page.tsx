@@ -14,6 +14,13 @@ import { useOrder } from "@/features/orders/use-order";
 import { formatEthLabel, isZeroEth, shortenHash } from "@/lib/eth";
 import { useIsDesktop } from "@/lib/use-media-query";
 
+/** Explorador de blocos de cada rede; o layout mostra a compra na Ethereum. */
+const EXPLORER_LABELS: Record<Order["network"], string> = {
+  ethereum: "Etherscan",
+  polygon: "Polygonscan",
+  solana: "Solscan",
+};
+
 /** Data como no layout: "29 Jul, 2026". */
 function formatDate(iso: string): string {
   const date = new Date(iso);
@@ -206,7 +213,7 @@ function OrderReceipt({ order }: { order: Order }) {
             </p>
             <Button asChild size="lg" className="text-base">
               <a href={order.transaction.explorerUrl} target="_blank" rel="noopener noreferrer">
-                Ver no Etherscan
+                Ver no {EXPLORER_LABELS[order.network]}
                 <span className="sr-only"> (abre em nova aba; transação simulada)</span>
               </a>
             </Button>

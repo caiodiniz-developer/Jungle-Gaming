@@ -164,6 +164,18 @@ export function replayEvent(eventId?: string): ServerEvent | null {
   return event;
 }
 
+/**
+ * Reentrega um evento a TODAS as conexões, ignorando o dono do recurso: simula
+ * um servidor que erra o roteamento, para provar que o cliente descarta eventos
+ * privados de outra conta. Sem `eventId`, usa o último.
+ */
+export function broadcastEvent(eventId?: string): ServerEvent | null {
+  const event = eventId ? eventLog.find((item) => item.id === eventId) : eventLog.at(-1);
+  if (!event) return null;
+  for (const connection of connections.values()) connection.emit(event.type, event);
+  return event;
+}
+
 /** Entrega um evento arbitrário, sem alterar o banco (ex.: evento antigo, com versão menor). */
 export function emitRaw(event: ServerEvent) {
   deliver(event);
@@ -181,6 +193,13 @@ export function dropConnections({ refuseNew = false } = {}) {
 
 export function restoreConnections() {
   accepting = true;
+}
+
+/** Volta o servidor de eventos ao estado inicial: sem histórico, aceitando conexões, ninguém conectado. */
+export function resetRealtime() {
+  eventLog.length = 0;
+  accepting = true;
+  for (const connection of [...connections.values()]) connection.close();
 }
 
 export function connectionCount(): number {

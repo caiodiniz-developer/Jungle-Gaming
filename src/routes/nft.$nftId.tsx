@@ -1,9 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useLayoutEffect } from "react";
 import { NotFound } from "@/components/not-found";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { nftDetailOptions, useNftDetail } from "@/features/catalog/use-nfts";
 import { NftDetailView } from "@/features/nft/nft-detail-view";
+import { pageTitle, withSite } from "@/lib/page-title";
+import { dismissShell } from "@/lib/shell";
 
 export const Route = createFileRoute("/nft/$nftId")({
   loader: ({ context, params }) => {
@@ -45,6 +48,17 @@ function DetailSkeleton() {
 function NftDetailPage() {
   const { nftId } = Route.useParams();
   const query = useNftDetail(nftId);
+
+  // a página pré-renderizada do NFT fica até a resposta da API chegar (conteúdo ou erro)
+  const settled = !query.isPending;
+  useLayoutEffect(() => {
+    if (settled) dismissShell();
+  }, [settled]);
+
+  const name = query.data?.name;
+  useEffect(() => {
+    document.title = name ? withSite(name) : pageTitle("/nft");
+  }, [name]);
 
   if (query.isPending) return <DetailSkeleton />;
 

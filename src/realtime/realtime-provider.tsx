@@ -8,6 +8,7 @@ import type {
   NftUpdatedEvent,
   Order,
   OrderUpdatedEvent,
+  Session,
 } from "@/api/contracts";
 import { formatEthLabel } from "@/lib/eth";
 import { GUEST_SESSION_KEY, queryKeys } from "@/lib/query-keys";
@@ -97,7 +98,13 @@ function notifyCartChange(queryClient: QueryClient, event: NftUpdatedEvent) {
  */
 function applyOrderUpdate(queryClient: QueryClient, event: OrderUpdatedEvent) {
   const { order } = event.data;
-  const sessionKey = getSessionToken() ?? GUEST_SESSION_KEY;
+  // evento privado: só vale para a conta que está na tela. Um evento da sessão
+  // anterior que chegue depois do logout ou da troca de usuário é descartado.
+  const sessionKey = getSessionToken();
+  if (sessionKey === null) return;
+  const currentUser = queryClient.getQueryData<Session>(queryKeys.session(sessionKey))?.user;
+  if (event.userId && currentUser && event.userId !== currentUser.id) return;
+
   const orderKey = queryKeys.order(sessionKey, order.id);
   queryClient.setQueryData<Order>(orderKey, order);
   void queryClient.invalidateQueries({ queryKey: queryKeys.orders(sessionKey) });

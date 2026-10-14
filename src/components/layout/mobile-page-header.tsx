@@ -20,7 +20,10 @@ export function MobilePageHeader({ title, backTo, backLabel }: MobilePageHeaderP
       >
         <Icon src={chevronLeftIcon} className="size-3.5 rotate-90" />
       </Link>
-      <h1 className="px-11 text-center text-xl leading-6 font-bold">{title}</h1>
+      {/* abaixo de 400px o título encolhe um ponto para caber numa linha, como no layout de 414px */}
+      <h1 className="px-11 text-center text-xl leading-6 font-bold max-[400px]:text-lg max-[400px]:tracking-tight">
+        {title}
+      </h1>
     </div>
   );
 }

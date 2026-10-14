@@ -20,6 +20,7 @@ export type ApiErrorCode =
   | "AVAILABILITY_CONFLICT" // 409 — edição esgotada ou quantidade acima do disponível
   | "QUOTE_STALE" // 409 — cotação desatualizada (ver `details`)
   | "IDEMPOTENCY_CONFLICT" // 409 — mesma chave com conteúdo diferente
+  | "ORDER_PENDING" // 409 — já existe um pedido aguardando confirmação (ver `details`)
   | "COUPON_INVALID" // 422
   | "COUPON_EXPIRED" // 422
   | "SERVICE_UNAVAILABLE" // 503 — falha transitória
@@ -307,6 +308,11 @@ export type QuoteChange = {
 export type QuoteStaleDetails = {
   quote: Quote;
   changes: QuoteChange[];
+};
+
+/** `details` do erro ORDER_PENDING: o pedido que ainda aguarda confirmação. */
+export type OrderPendingDetails = {
+  orderId: string;
 };
 
 // ───────────────────────────── Pedidos ─────────────────────────────

@@ -1,4 +1,4 @@
-import type { CreateOrderRequest, Order, OrderLine } from "@/api/contracts";
+import type { CreateOrderRequest, Network, Order, OrderLine } from "@/api/contracts";
 import { WALLET_PROVIDER_LABELS } from "@/api/contracts";
 import { addEth, percentOfEth } from "@/lib/eth";
 import { getConfig } from "@/mocks/config";
@@ -87,6 +87,15 @@ export function createOrder(
     return { order: existing, replayed: true };
   }
 
+  // uma compra por vez: enquanto um pedido aguarda confirmação o carrinho ainda tem os
+  // mesmos itens, e um segundo envio (com outra chave) compraria tudo de novo
+  const pending = current.orders.find((order) => order.userId === user.id && order.status === "pending");
+  if (pending) {
+    fail(409, "ORDER_PENDING", "Você já tem um pedido aguardando confirmação.", {
+      details: { orderId: pending.id },
+    });
+  }
+
   applySubmitScenario(user.id);
 
   const cart = getCart(user.id);
@@ -113,7 +122,13 @@ export function createOrder(
       fields: { walletId: "Selecione uma carteira cadastrada." },
     });
   }
-  if (current.walletConnections[user.id]?.walletId !== wallet.id) {
+  // a conexão vale para a combinação exata de carteira, provedor e rede
+  const connection = current.walletConnections[user.id];
+  if (
+    connection?.walletId !== wallet.id ||
+    connection.provider !== body.provider ||
+    connection.network !== body.network
+  ) {
     fail(403, "WALLET_REJECTED", "Conecte a carteira antes de confirmar a compra.");
   }
 
@@ -185,6 +200,13 @@ export function cancelOrderTimers() {
   timers.clear();
 }
 
+/** Explorador de blocos de cada rede (os links são simulados: a transação não existe). */
+const EXPLORER_TX_URLS: Record<Network, string> = {
+  ethereum: "https://etherscan.io/tx/",
+  polygon: "https://polygonscan.com/tx/",
+  solana: "https://solscan.io/tx/",
+};
+
 /** Hash de transação simulado, derivado do id do pedido (estável entre execuções). */
 function simulatedTransactionHash(orderId: string): string {
   const parts = Array.from({ length: 8 }, (_, index) => fingerprint(`${orderId}:${index}`));
@@ -245,7 +267,7 @@ export function resolveOrder(
     touchCart(cart);
 
     const hash = simulatedTransactionHash(order.id);
-    order.transaction = { hash, explorerUrl: `https://etherscan.io/tx/${hash}` };
+    order.transaction = { hash, explorerUrl: `${EXPLORER_TX_URLS[order.network]}${hash}` };
   } else {
     order.rejectionReason = rejectionReason;
   }

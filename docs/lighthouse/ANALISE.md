@@ -4,62 +4,68 @@ Os números estão em [README.md](README.md) (gerado por `pnpm lighthouse`) e no
 
 ## Resultado
 
-| Página | Perfil | Performance | Accessibility | Best Practices | SEO | FCP | LCP | CLS | TBT |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Início | desktop | 98 | 100 | 100 | 100 | 0,6 s | 0,9 s | 0 | 0 ms |
-| Detalhes do NFT | desktop | 98 | 100 | 100 | 100 | 0,6 s | 0,9 s | 0 | 0 ms |
-| Início | mobile | **82** | 100 | 100 | 100 | 2,3 s | 3,9 s | 0 | 115 ms |
-| Detalhes do NFT | mobile | **83** | 100 | 100 | 100 | 2,3 s | 3,7 s | 0 | 128 ms |
+| Página | Perfil | Performance | Accessibility | Best Practices | SEO | LCP | CLS | TBT |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Início | mobile | 98 | 100 | 100 | 100 | 1,75 s | 0 | 79 ms |
+| Início | desktop | 99 | 100 | 100 | 100 | 0,89 s | 0 | 0 ms |
+| Detalhes do NFT | mobile | 99 | 100 | 100 | 100 | 1,74 s | 0,001 | 56 ms |
+| Detalhes do NFT | desktop | 99 | 100 | 100 | 100 | 0,88 s | 0 | 0 ms |
 
-Acessibilidade, boas práticas e SEO atingem as metas nas duas páginas e nos dois perfis. Performance atinge a meta no desktop. **No perfil mobile, performance fica em 82–83, abaixo da meta de 90.** Entre execuções no mesmo código a nota mobile variou de 81 a 85, conforme a carga da máquina no momento (o LCP simulado ficou sempre entre 3,7 e 3,9 s; o que oscila é TBT e Speed Index).
+Todas as medianas atingem as metas (Performance ≥ 90, Accessibility ≥ 95, Best Practices ≥ 95, SEO ≥ 90), nas duas páginas e nos dois perfis. Em dez medições seguidas no perfil mobile, a nota de performance ficou entre 98 e 100.
 
-## Por que o mobile fica abaixo de 90
+## Como o perfil mobile saiu de 82 para 98
 
-A nota de performance do Lighthouse pesa TBT (30%), LCP (25%), CLS (25%), FCP (10%) e Speed Index (10%). TBT e CLS estão no máximo; o que derruba a nota é o **LCP de 3,7–3,9 s** (nota parcial ≈ 0,5) e, em menor grau, o FCP de 2,2 s.
+Na primeira versão da entrega o perfil mobile marcava 82–83, com LCP simulado de 3,7–4,0 s. O perfil simula rede 4G lenta (RTT de 150 ms, 1,6 Mbps) e CPU quatro vezes mais lenta, e a causa era a arquitetura: o HTML chegava vazio e nada aparecia antes de baixar e executar cerca de 250 kB de JavaScript comprimido (React, roteador, cache, a camada de mocks) e, no detalhe, antes da resposta da API simulada, de onde vem o endereço da imagem.
 
-O perfil mobile simula rede 4G lenta (RTT de 150 ms, 1,6 Mbps) e CPU quatro vezes mais lenta. Nessas condições, a causa é a arquitetura da entrega, não um recurso isolado:
+Os relatórios mostraram qual era o maior elemento de cada tela no celular:
 
-1. **A aplicação é renderizada inteiramente no cliente.** O HTML chega vazio; a primeira pintura só acontece depois de baixar e executar o JavaScript (React, TanStack Router e Query, componentes — cerca de 105 kB comprimidos no bloco principal, mais o bloco da rota). Com CPU 4× mais lenta, só a execução dos scripts soma cerca de 1 s.
-2. **O carregamento é uma cadeia:** documento → script de entrada → blocos da aplicação e dos mocks → bloco da rota → resposta da API → imagem. Cada elo custa ao menos uma ida e volta de 150 ms na rede simulada.
-3. **O backend roda no navegador.** O enunciado pede que os mocks (MSW) estejam ativos no build de demonstração. Antes da primeira requisição, a página registra o service worker e monta o banco simulado; cada resposta da API tem ainda a latência simulada do cenário padrão (120–380 ms). No detalhe, a imagem do NFT — o elemento de LCP — só pode começar a baixar depois dessa resposta, porque o endereço dela vem dos dados.
+- **Início:** o fundo da barra de navegação inferior (maior que os cards e que a imagem do banner). É estático.
+- **Detalhes do NFT:** a imagem da obra. Depende dos dados do NFT.
 
-Para separar o peso de cada causa, medi a página inicial num build **sem a camada de mocks** (`VITE_ENABLE_MOCKS=false`, três medições, perfil mobile). Sem API o catálogo não carrega, então essa medição serve só de diagnóstico e não entra nos resultados: o FCP ficou nos mesmos 2,2 s. Ou seja, **a primeira pintura é limitada pelo custo de iniciar a própria SPA**, não pelos mocks; os mocks pesam sobre o LCP, por adiarem a chegada dos dados.
+Nenhum dos dois precisa de JavaScript para ser desenhado. A correção foi **pré-renderizar a primeira dobra mobile no build**:
 
-## O que foi feito para chegar a estes números
+1. `pnpm build` renderiza, com os próprios componentes e rotas da aplicação (`react-dom/server`), a tela inicial no estado "carregando" e a tela de detalhe de cada um dos 239 NFTs com os dados das fixtures ([src/prerender/render.tsx](../../src/prerender/render.tsx), [scripts/prerender.mjs](../../scripts/prerender.mjs)). Não há HTML escrito à mão.
+2. Esse HTML vai dentro de um `<template>` em `dist/index.html` e em `dist/nft/<id>.html`. Um script embutido de poucas linhas o coloca na tela antes da primeira pintura, se o viewport for mobile e o endereço for o da página.
+3. A aplicação é carregada depois que essa primeira dobra (com a imagem principal) foi pintada, monta por baixo dela e a remove quando a tela real está pronta: no início, assim que a rota monta (a tela é idêntica: banner e grade em carregamento); no detalhe, quando a resposta da API chega.
 
-Primeira medição: mobile 84/85, desktop 97 (início) e **87** (detalhe), acessibilidade **94** no detalhe mobile.
+O efeito medido: FCP de 2,4 s para 1,2 s e LCP de 3,7–4,0 s para 1,6–1,75 s. O TBT continuou baixo (50–90 ms).
 
-- **Deslocamento de layout no detalhe (CLS 0,22 → 0).** Enquanto os dados carregavam, o rodapé aparecia na primeira dobra e era empurrado quando o conteúdo chegava. A área principal passou a ter altura mínima de uma tela. Isso levou o detalhe no desktop de 87 para 98–99.
-- **Acessibilidade no detalhe (94 → 100).** A nota compacta usava `aria-label` num `<p>` sem papel (ignorado por leitores de tela) e passou a ser `role="img"`; a edição esgotada perdia contraste por usar opacidade (3,96:1) e passou a ser indicada só por borda tracejada, texto riscado e nome acessível.
-- **Bundle dos mocks de 175 kB para 63 kB comprimidos.** O MSW depende do `tough-cookie`, que embute a lista de sufixos públicos de domínio (`tldts`, ~128 kB). A simulação não usa cookies, então o pacote foi trocado por um substituto mínimo (`src/mocks/tldts-stub.ts`, alias em `vite.config.ts`).
-- **Mocks e aplicação baixam em paralelo.** Antes, a aplicação só começava a baixar depois de os mocks estarem ativos. O `socket.io-client`, que precisava dessa ordem, passou a ser carregado sob demanda (`src/realtime/socket.ts`).
-- **`robots.txt` válido**, para o SEO não depender do fallback da SPA.
+### O que a pré-renderização não faz
 
-As otimizações de carregamento acima reduziram bytes e idas e voltas, mas **não mudaram a nota mobile**: o LCP simulado continuou em 3,7–3,9 s, o que confirma que o limite é o custo de CPU e a cadeia de inicialização da SPA, não o volume transferido.
+- **Não remove nada da página auditada.** Fontes, imagens, MSW, o banco simulado e a conexão Socket.IO carregam como antes; o que mudou foi a ordem (conteúdo primeiro, aplicação depois). A versão publicada é a mesma que a auditada.
+- **Não mostra dado desatualizado.** A página inicial pré-renderizada não contém dados (a grade aparece em carregamento). A do detalhe contém nome, imagem, preço e edições das fixtures, que é exatamente o que a API simulada responde num banco recém-criado. Depois da primeira visita o banco simulado passa a existir no navegador e pode divergir das fixtures (um preço alterado, uma edição esgotada); nesse caso o HTML do detalhe não é exibido e vale só a resposta da API. O teste `mobile.spec.ts › primeira dobra pré-renderizada` cobre as duas situações.
+- **Não fica interativa nem visível a leitores de tela.** A camada é `inert` e `aria-hidden` até a aplicação assumir; ids e rótulos são retirados para não colidir com os da aplicação.
+- **Não vale para o desktop.** Só a variante mobile é gerada. O perfil desktop já atingia 98–99 e segue renderizado no cliente.
 
-- **Banner inicial com uma só variante montada.** Desktop e mobile eram renderizados juntos e um ficava oculto por CSS; no celular isso baixava, com prioridade alta, uma imagem de 900 px que não aparecia.
+### Outras mudanças desta rodada
 
-### Tentativas medidas e revertidas
+- Ícones: o SVG de cada ícone era embutido duas vezes no atributo `style` (máscara com e sem prefixo). Passou a ir numa variável CSS, e a regra da máscara fica uma vez só na folha de estilos. Isso reduziu o HTML de uma página de detalhe de 223 kB para 21 kB.
+- Header e rodapé não são mais montados abaixo de 1024 px (antes eram montados e escondidos por CSS).
+- A imagem principal usa `decoding="sync"`, para entrar no mesmo quadro do texto.
 
-Todas foram medidas com três execuções no perfil mobile; nenhuma melhorou a nota.
+## Histórico: o que já tinha sido feito
+
+- **Deslocamento de layout no detalhe (CLS 0,22 → 0).** A área principal passou a ter altura mínima de uma tela, para o rodapé não aparecer e ser empurrado quando os dados chegam.
+- **Acessibilidade no detalhe (94 → 100).** A nota compacta ganhou `role="img"`; a edição esgotada deixou de usar opacidade (contraste 3,96:1) e é indicada por borda tracejada, texto riscado e nome acessível.
+- **Bundle dos mocks de 175 kB para 63 kB comprimidos.** O `tough-cookie` do MSW embute a lista de sufixos públicos de domínio (`tldts`, ~128 kB); a simulação não usa cookies e o pacote foi trocado por um substituto mínimo (`src/mocks/tldts-stub.ts`).
+- **Mocks e aplicação baixam em paralelo**; o `socket.io-client` é carregado sob demanda.
+- **`robots.txt` válido** e banner inicial com uma só variante montada.
+
+### Tentativas que não funcionaram (antes da pré-renderização)
+
+Todas foram medidas com três execuções no perfil mobile e revertidas.
 
 | Tentativa | Resultado | Por quê |
 | --- | --- | --- |
-| Listar os blocos principais como `<link rel="modulepreload">` no HTML | 84 → 80 (FCP 2,2 → 3,2 s) | Os downloads passaram a disputar banda antes da primeira pintura |
-| Registrar o service worker já no HTML, antes do JavaScript | 84 → 80 | Com o worker ativo cedo, o download dos blocos passou a passar por ele e atrasou |
-| Renderizar a interface antes de os mocks estarem prontos, retendo as requisições no cliente HTTP | 84 → 77 (LCP 3,9 → 4,8 s) | A primeira pintura real adiantou (1,7 → 1,2 s observados), mas a inicialização dos mocks passou a concorrer com ela na thread principal, e a simulação do Lighthouse somou os dois custos |
-| O mesmo, iniciando os mocks só depois do primeiro quadro | 77 | Idem: o primeiro quadro com conteúdo ainda saía depois da inicialização dos mocks |
-| `content-visibility: auto` nas seções abaixo da dobra | sem mudança (82–83) | O LCP simulado não depende das imagens fora da tela |
+| Listar os blocos principais como `<link rel="modulepreload">` | 84 → 80 | Os downloads passaram a disputar banda antes da primeira pintura |
+| Registrar o service worker já no HTML | 84 → 80 | O download dos blocos passou a passar pelo worker |
+| Renderizar a interface antes de os mocks estarem prontos | 84 → 77 | A inicialização dos mocks passou a concorrer com a primeira renderização |
+| `content-visibility: auto` abaixo da dobra | sem mudança | O LCP não dependia do que está fora da tela |
 
-A conclusão das medições: o LCP simulado de ~3,9 s corresponde ao tempo de baixar e executar todo o JavaScript necessário para a primeira renderização, sob CPU 4× mais lenta. Reordenar ou adiar partes desse trabalho não o reduz; só tirá-lo do caminho da primeira pintura reduziria.
-
-## O que fecharia a diferença
-
-Atingir 90 no perfil mobile exigiria pintar conteúdo antes de o JavaScript executar: renderização no servidor ou pré-renderização das rotas públicas, com os dados do catálogo já no HTML. Isso muda a arquitetura (a stack pedida é uma SPA com API simulada no navegador) e ficou fora desta entrega. Com uma API real, o item 3 da lista de causas desaparece e o LCP do detalhe cai junto.
+Elas confirmaram que reordenar o JavaScript não resolvia: era preciso que o conteúdo não dependesse dele.
 
 ## Condições da auditoria
 
-- Build de produção (`vite build`) servido por `vite preview`, sem compressão HTTP. Um host com Brotli reduz o tempo de download em relação ao medido aqui.
-- Cenário padrão dos mocks, banco simulado no estado inicial (armazenamento limpo a cada medição).
-- A página é carregada como publicada: fontes, imagens, MSW e a conexão Socket.IO ativos. Nenhuma funcionalidade é desligada para a medição.
+- Build de produção (`pnpm build`) servido por `vite preview`, sem compressão HTTP. Um host com Brotli reduz o tempo de download em relação ao medido aqui.
+- Cenário padrão dos mocks, banco simulado no estado inicial (armazenamento limpo a cada medição, que é a condição de uma primeira visita).
 - Três medições por página e perfil; o valor reportado é a mediana, e os relatórios guardados são os da medição mediana em performance. Ambiente e versões das ferramentas estão em [README.md](README.md) e em `summary.json`.

@@ -274,8 +274,11 @@ const POSTS: { date: string; read: string; title: string; text: string; artwork:
   },
 ];
 
-/** Cards do "Diário da Cunhagem"; "Ler mais" leva à página Aprenda. */
-export function Blog() {
+/**
+ * Cards do "Diário da Cunhagem". "Ler mais" leva à página Aprenda; nela o link
+ * é omitido (`readMore={false}`), para não apontar para a própria página.
+ */
+export function Blog({ readMore = true }: { readMore?: boolean }) {
   return (
     <section aria-labelledby="blog-title" className="container-page flex flex-col items-center gap-10">
       <div className="flex flex-col gap-3 text-center">
@@ -307,10 +310,15 @@ export function Blog() {
               </p>
               <h3 className="text-base font-bold">{post.title}</h3>
               <p className="text-xs leading-4 font-medium text-sand">{post.text}</p>
-              <Link to="/aprenda" className="mt-auto text-xs leading-[14px] font-bold text-highlight hover:underline">
+              {readMore && (
+                <Link
+                  to="/aprenda"
+                  className="mt-auto text-xs leading-[14px] font-bold text-highlight hover:underline"
+                >
                 Ler mais <span aria-hidden="true">→</span>
                 <span className="sr-only">: {post.title}</span>
-              </Link>
+                </Link>
+              )}
             </div>
           </Reveal>
         ))}

@@ -6,6 +6,8 @@ import type { Wallet, WalletKind } from "@/api/contracts";
 import { walletSchema, type WalletValues } from "@/api/schemas";
 import { EnsField, FormMessage, SelectField, TextField } from "@/components/form-fields";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSaveWallet, useWallets } from "@/features/account/use-account";
 import { applyApiError } from "@/lib/form-errors";
@@ -250,16 +252,14 @@ export function WalletsPage() {
             </h2>
             {!showSecondaryForm && (
               <div className="flex items-center gap-4">
-                <label className="flex cursor-pointer items-center gap-2 text-sm leading-4">
-                  <input
-                    type="checkbox"
+                <Label className="cursor-pointer gap-2 text-sm leading-4">
+                  <Checkbox
                     checked={sameAsPrimary}
                     disabled={!primary}
-                    onChange={(event) => setSameAsPrimary(event.target.checked)}
-                    className="size-4 accent-primary"
+                    onCheckedChange={(checked) => setSameAsPrimary(checked === true)}
                   />
                   Igual à carteira principal
-                </label>
+                </Label>
                 <button
                   type="button"
                   onClick={() => setAddingSecondary(true)}

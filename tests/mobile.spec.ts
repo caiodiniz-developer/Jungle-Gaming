@@ -79,6 +79,48 @@ test.describe("Mobile", () => {
     await expectNoHorizontalOverflow(page);
   });
 
+  test("primeira dobra pré-renderizada: aparece sem JavaScript e a aplicação assume sem troca visível", async ({
+    app,
+    page,
+  }) => {
+    // sem JavaScript, o HTML já mostra o NFT (imagem, nome e preço das fixtures)
+    await page.route("**/assets/*.js", (route) => route.abort());
+    await page.goto("/nft/nft-0042");
+    const shell = page.locator("#shell");
+    await expect(shell.getByText("Emerald Ape #042")).toBeVisible();
+    await expect(shell.getByText("1.19 ETH")).toBeVisible();
+    await expect(shell.locator("img[elementtiming]")).toHaveJSProperty("complete", true);
+    // é decorativa até a aplicação assumir: fora da árvore de acessibilidade e sem interação
+    await expect(shell).toHaveAttribute("aria-hidden", "true");
+    await expect(shell).toHaveAttribute("inert", "");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveCount(0);
+
+    // com JavaScript, a aplicação monta por baixo e remove a camada quando os dados chegam
+    await page.unroute("**/assets/*.js");
+    await app.open("/nft/nft-0042");
+    await expect(page.getByRole("heading", { level: 1, name: "Emerald Ape #042" })).toBeVisible();
+    await expect(shell).toHaveCount(0);
+    await expect(page).toHaveTitle("Emerald Ape #042 — Kurio");
+
+    // o preço muda: daqui em diante o HTML das fixtures estaria desatualizado e não é mais exibido
+    await app.mocks("updateNft", "nft-0042", { price: "3" });
+    await page.route("**/assets/*.js", (route) => route.abort());
+    await page.goto("/nft/nft-0042");
+    await expect(page.locator("#shell-template")).toHaveCount(1);
+    await expect(shell).toHaveCount(0);
+    await page.unroute("**/assets/*.js");
+    await app.open("/nft/nft-0042");
+    await expect(page.getByTestId("nft-price")).toContainText("3.00 ETH");
+
+    // a página inicial não depende de dados: a moldura pré-renderizada vale sempre
+    await page.route("**/assets/*.js", (route) => route.abort());
+    await page.goto("/");
+    await expect(shell.getByText("SEJA DONO DA")).toBeVisible();
+    // e nunca aparece em outra rota servida pelo mesmo index.html
+    await page.goto("/carrinho");
+    await expect(shell).toHaveCount(0);
+  });
+
   test("pedido pendente no mobile: confirmado por evento, sem recarregar", async ({ app, page }) => {
     await app.open("/", "pedido-pendente");
     await app.addToCart();

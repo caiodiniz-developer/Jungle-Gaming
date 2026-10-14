@@ -1,6 +1,8 @@
 import { Controller } from "react-hook-form";
 import type { Wallet } from "@/api/contracts";
 import { EnsField, SelectField, TextField } from "@/components/form-fields";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import type { CheckoutForm } from "@/features/checkout/checkout-schema";
 import { NETWORK_OPTIONS, PROVIDER_OPTIONS } from "@/lib/options";
 
@@ -123,15 +125,15 @@ export function CollectorNote({ form }: { form: CheckoutForm }) {
   const error = form.formState.errors.collector?.note?.message;
   return (
     <div className="flex flex-col">
-      <label htmlFor="observacao" className="flex min-h-[29px] items-center text-[15px] leading-none">
+      <Label htmlFor="observacao" className="min-h-[29px]">
         Observação do colecionador (opcional)
-      </label>
-      <textarea
+      </Label>
+      <Textarea
         id="observacao"
         maxLength={280}
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? "observacao-erro" : undefined}
-        className="h-[152px] w-full resize-none rounded-sm border border-input bg-transparent p-3 text-sm outline-none focus-visible:border-primary focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring aria-invalid:border-destructive md:max-w-[350px]"
+        className="h-[152px] resize-none p-3 md:max-w-[350px]"
         {...form.register("collector.note")}
       />
       {error && (

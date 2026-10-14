@@ -3,9 +3,12 @@ import { useId, useState } from "react";
 import chevronDownIcon from "@/assets/icons/chevron-down.svg";
 import eyeOffIcon from "@/assets/icons/eye-off.svg";
 import { Icon } from "@/components/icon";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
-const controlClass =
+/** Mesma aparência do `Input` do shadcn/ui, para o `<select>` nativo. */
+const selectClass =
   "h-10 w-full min-w-0 rounded-sm border border-input bg-transparent px-3 text-sm text-foreground transition-colors outline-none placeholder:text-subtle focus-visible:border-primary focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive";
 
 type FieldShellProps = {
@@ -24,17 +27,14 @@ type FieldShellProps = {
 function FieldShell({ id, label, required, hideLabel, error, hint, className, children }: FieldShellProps) {
   return (
     <div className={cn("flex min-w-0 flex-col", className)}>
-      <label
-        htmlFor={id}
-        className={cn("flex min-h-[29px] items-center text-[15px] leading-none", hideLabel && "sr-only")}
-      >
+      <Label htmlFor={id} className={cn("min-h-[29px]", hideLabel && "sr-only")}>
         {label}
         {required && (
           <span aria-hidden="true" className="ml-0.5 text-[22px] leading-[29px] text-coral">
             *
           </span>
         )}
-      </label>
+      </Label>
       {children}
       {hint && !error && (
         <p id={`${id}-hint`} className="mt-1.5 text-xs leading-4 text-sand">
@@ -83,12 +83,12 @@ export function TextField({
   const generatedId = useId();
   const fieldId = id ?? generatedId;
   const input = (
-    <input
+    <Input
       id={fieldId}
       aria-required={required || undefined}
       aria-invalid={error ? true : undefined}
       aria-describedby={describedBy(fieldId, error, hint)}
-      className={cn(controlClass, className)}
+      className={className}
       {...inputProps}
     />
   );
@@ -134,13 +134,13 @@ export function PasswordField({
       className={fieldClassName}
     >
       <div className="relative">
-        <input
+        <Input
           id={fieldId}
           type={visible ? "text" : "password"}
           aria-required={required || undefined}
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy(fieldId, error, hint)}
-          className={cn(controlClass, "pr-11", className)}
+          className={cn("pr-11", className)}
           {...inputProps}
         />
         <button
@@ -194,7 +194,7 @@ export function SelectField({
           aria-required={required || undefined}
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy(fieldId, error, hint)}
-          className={cn(controlClass, "appearance-none pr-10 has-[option[value='']:checked]:text-subtle", className)}
+          className={cn(selectClass, "appearance-none pr-10 has-[option[value='']:checked]:text-subtle", className)}
           {...selectProps}
         >
           <option value="">{placeholder}</option>

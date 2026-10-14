@@ -289,3 +289,28 @@
     scroll-behavior: auto !important;
   }
 }
+
+/*
+ * Primeira dobra pré-renderizada (scripts/prerender.mjs): fica por cima da
+ * aplicação até ela estar pronta. Só existe na variante mobile.
+ */
+#shell {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 50;
+  min-height: 100dvh;
+  overflow: hidden;
+  background: var(--background);
+}
+
+@media (min-width: 1024px) {
+  #shell {
+    display: none;
+  }
+}
+
+/* Ícone desenhado como máscara (components/icon.tsx): o SVG vem em --icon. */
+.icon-mask {
+  -webkit-mask: var(--icon) center / contain no-repeat;
+  mask: var(--icon) center / contain no-repeat;
+}

@@ -10,3 +10,6 @@ export const env = {
   /** Tempo limite padrão das requisições, em ms. */
   requestTimeout: Number(raw.VITE_REQUEST_TIMEOUT ?? 10_000),
 } as const;
+
+/** Verdadeiro na pré-renderização do build (Node), onde só a primeira dobra é gerada. */
+export const isPrerender = typeof window === "undefined";

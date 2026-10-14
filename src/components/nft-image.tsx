@@ -34,8 +34,11 @@ export function NftImage({ artwork, alt, size, sizes, priority = false, classNam
       alt={alt}
       loading={priority ? "eager" : "lazy"}
       fetchPriority={priority ? "high" : "auto"}
-      decoding="async"
+      // a imagem principal entra já no primeiro quadro; as demais não seguram a pintura
+      decoding={priority ? "sync" : "async"}
       draggable={false}
+      // Element Timing: permite saber quando a imagem principal foi de fato pintada (ver main.tsx)
+      {...(priority ? { elementtiming: "imagem-principal" } : null)}
       className={cn("aspect-square bg-surface-raised object-cover", className)}
     />
   );

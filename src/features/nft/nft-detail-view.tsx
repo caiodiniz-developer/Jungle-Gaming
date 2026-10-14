@@ -17,6 +17,7 @@ import { useAddToCart } from "@/features/cart/use-cart";
 import { FavoriteButton } from "@/features/favorites/favorite-button";
 import { Gallery } from "@/features/nft/gallery";
 import { RelatedCarousel } from "@/features/nft/related-carousel";
+import { isPrerender } from "@/lib/env";
 import { formatEthLabel } from "@/lib/eth";
 import { useIsDesktop } from "@/lib/use-media-query";
 import { cn } from "@/lib/utils";
@@ -244,8 +245,13 @@ export function NftDetailView({ nft }: { nft: NftDetail }) {
           <p className="text-sm leading-6 text-sand">{nft.summary}</p>
           {editionPicker}
           {tokenInfo}
-          <div className="pt-6">{description}</div>
-          <div className="pt-6">{related}</div>
+          {/* abaixo da dobra: fica fora do HTML pré-renderizado */}
+          {!isPrerender && (
+            <>
+              <div className="pt-6">{description}</div>
+              <div className="pt-6">{related}</div>
+            </>
+          )}
         </div>
 
         <div className="fixed inset-x-0 bottom-0 z-30 flex flex-col gap-5 rounded-t-[40px] bg-surface px-6 pt-5 pb-9 shadow-glow">

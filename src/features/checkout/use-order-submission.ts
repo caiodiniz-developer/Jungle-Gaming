@@ -2,7 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import type { CreateOrderRequest, QuoteStaleDetails } from "@/api/contracts";
+import type { CreateOrderRequest, OrderPendingDetails, QuoteStaleDetails } from "@/api/contracts";
 import { CHECKOUT_API_FIELDS, type CheckoutForm } from "@/features/checkout/checkout-schema";
 import { clearOrderAttempt } from "@/features/checkout/order-attempt";
 import { useSubmitOrder } from "@/features/checkout/use-checkout";
@@ -18,6 +18,12 @@ function isQuoteStaleDetails(details: unknown): details is QuoteStaleDetails {
     "quote" in details &&
     "changes" in details &&
     Array.isArray(details.changes)
+  );
+}
+
+function isOrderPendingDetails(details: unknown): details is OrderPendingDetails {
+  return (
+    typeof details === "object" && details !== null && "orderId" in details && typeof details.orderId === "string"
   );
 }
 
@@ -68,6 +74,16 @@ export function useOrderSubmission({ form, onWalletRejected }: Options) {
       case "WALLET_REJECTED":
         onWalletRejected();
         setFormError("A carteira não está conectada. Conecte-a novamente para confirmar a compra.");
+        return;
+
+      case "ORDER_PENDING":
+        if (!isOrderPendingDetails(error.details)) break;
+        // já há uma compra em andamento com estes itens: mostra ela em vez de criar outra
+        clearOrderAttempt();
+        toast.info("Você já tem um pedido aguardando confirmação.", {
+          description: "Acompanhe o resultado antes de comprar de novo.",
+        });
+        void navigate({ to: "/pedidos/$orderId", params: { orderId: error.details.orderId }, replace: true });
         return;
 
       case "IDEMPOTENCY_CONFLICT":

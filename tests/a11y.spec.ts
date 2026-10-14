@@ -115,6 +115,19 @@ test.describe("Acessibilidade e responsividade", () => {
     await expect(page.locator("#catalogo p[role=status]")).toHaveText(/NFTs? encontrados?\./);
   });
 
+  test("cada tela tem um título de documento próprio", async ({ app, page }) => {
+    await app.open("/");
+    await expect(page).toHaveTitle("Kurio — Marketplace de NFTs");
+    await app.open("/nft/nft-0042");
+    await expect(page).toHaveTitle("Emerald Ape #042 — Kurio");
+    await app.open("/carrinho");
+    await expect(page).toHaveTitle("Carrinho de NFTs — Kurio");
+    await app.open("/entrar");
+    await expect(page).toHaveTitle("Entrar — Kurio");
+    await app.open("/rota-que-nao-existe");
+    await expect(page).toHaveTitle("Página não encontrada — Kurio");
+  });
+
   for (const width of [390, 768, 1440]) {
     test(`sem rolagem horizontal em ${width}px nas telas principais`, async ({ app, page }) => {
       await page.setViewportSize({ width, height: 900 });

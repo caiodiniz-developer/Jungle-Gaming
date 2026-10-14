@@ -13,7 +13,7 @@ export function LearnPage() {
           carteira.
         </p>
       </div>
-      <Blog />
+      <Blog readMore={false} />
       <div className="container-page flex flex-col items-start gap-3">
         <h2 className="text-lg font-bold">Ainda com dúvidas?</h2>
         <Button asChild>

@@ -1,4 +1,5 @@
 import { createRootRouteWithContext, Outlet, useRouterState } from "@tanstack/react-router";
+import { useEffect, useLayoutEffect } from "react";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 import { MobileTabBar } from "@/components/layout/mobile-tab-bar";
@@ -6,6 +7,9 @@ import { useShowMobileTabBar } from "@/components/layout/use-show-mobile-tab-bar
 import { NotFound } from "@/components/not-found";
 import { Toaster } from "@/components/ui/sonner";
 import { SessionWatcher } from "@/features/auth/session-watcher";
+import { pageTitle } from "@/lib/page-title";
+import { dismissShell } from "@/lib/shell";
+import { useIsDesktop } from "@/lib/use-media-query";
 import { cn } from "@/lib/utils";
 import type { RouterContext } from "@/router";
 
@@ -20,7 +24,21 @@ export const Route = createRootRouteWithContext<RouterContext>()({
  */
 function RootLayout() {
   const hasTabBar = useShowMobileTabBar();
-  const section = useRouterState({ select: (state) => state.location.pathname.split("/")[1] ?? "" });
+  const isDesktop = useIsDesktop();
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const settled = useRouterState({ select: (state) => state.status === "idle" });
+  const section = pathname.split("/")[1] ?? "";
+
+  // A primeira dobra pré-renderizada sai quando a rota termina de carregar. Início e
+  // detalhe do NFT a removem por conta própria, no momento em que têm o mesmo conteúdo.
+  useLayoutEffect(() => {
+    if (settled && pathname !== "/" && !pathname.startsWith("/nft/")) dismissShell();
+  }, [settled, pathname]);
+
+  // cada tela tem seu título; o detalhe do NFT troca o seu pelo nome da obra quando os dados chegam
+  useEffect(() => {
+    if (!pathname.startsWith("/nft/")) document.title = pageTitle(pathname);
+  }, [pathname]);
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -30,7 +48,8 @@ function RootLayout() {
       >
         Pular para o conteúdo
       </a>
-      <Header />
+      {/* header e rodapé só existem na moldura desktop: no mobile nem são montados */}
+      {isDesktop && <Header />}
       {/* altura mínima de uma tela: o rodapé fica abaixo da dobra e não é empurrado quando os dados chegam */}
       <main
         id="conteudo"
@@ -42,9 +61,7 @@ function RootLayout() {
           <Outlet />
         </div>
       </main>
-      <div className="hidden lg:block">
-        <Footer />
-      </div>
+      {isDesktop && <Footer />}
       <MobileTabBar />
       <SessionWatcher />
       <Toaster />

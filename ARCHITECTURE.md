@@ -27,6 +27,12 @@ src/realtime/* ── socket.io-client ──►  WebSocket ┘
 | `src/features/` | Uma pasta por domínio: hooks de dados e telas |
 | `src/routes/` | Rotas por arquivo; só ligam URL, guarda e componente |
 | `src/mocks/` | Handlers, regras de negócio (`domain/`), fixtures, cenários e servidor Socket.IO simulado |
+| `src/prerender/` | Renderização, no build, da primeira dobra mobile (seção 13) |
+| `src/components/ui/` | Primitivos do shadcn/ui adaptados aos tokens do layout |
+
+### shadcn/ui
+
+Os primitivos em `src/components/ui/` foram reestilizados com os tokens do Figma (cores, raios, alturas) e são a base dos controles: `Button`, `Input`, `Label` e `Textarea` em todos os formulários (via [src/components/form-fields.tsx](src/components/form-fields.tsx)), `Checkbox` nas carteiras, `Dialog` (login, cadastro, zoom, recibo), `Sheet` (filtros), `DropdownMenu` (menu da conta), `Select` (ordenação), `Slider` (faixa de preço), `Skeleton` e `Sonner` (avisos). Ficaram como elementos nativos, de propósito: os `<select>` dos formulários (teclado e leitor de tela do sistema, inclusive no celular) e os rádios e caixas desenhados como cartão, em que o campo nativo invisível cobre o cartão inteiro.
 
 O pagamento, a tela com mais estado, é dividido assim (`src/features/checkout/`):
 
@@ -58,7 +64,7 @@ Prefixo `/api`. Corpo e respostas em JSON. A fonte dos tipos é [src/api/contrac
 | | `PATCH /cart/items/:lineId`, `DELETE /cart/items/:lineId` | `lineId` = `nftId:editionId` |
 | | `PUT /cart/coupon`, `DELETE /cart/coupon` | 422 `COUPON_INVALID` / `COUPON_EXPIRED`, com a mensagem no campo `code` |
 | Cotação | `POST /quotes` | `{ network? }` → subtotal, desconto, taxa de rede, total, `purchasable` e `hash` |
-| Pedidos | `POST /orders` | Cabeçalho `Idempotency-Key` obrigatório. 202 (criado, pendente) ou 200 (mesma tentativa) |
+| Pedidos | `POST /orders` | Cabeçalho `Idempotency-Key` obrigatório. 202 (criado, pendente) ou 200 (mesma tentativa). 409 `ORDER_PENDING` se a conta já tem um pedido aguardando confirmação |
 | | `GET /orders`, `GET /orders/:orderId` | 404 `NOT_FOUND`, 403 `FORBIDDEN` para pedido de outra conta |
 | Perfil | `GET /profile`, `PATCH /profile`, `PUT /profile/avatar`, `DELETE /profile/avatar`, `PUT /profile/password` | Conflitos e erros de validação por campo |
 | Carteiras | `GET /wallets`, `POST /wallets`, `PUT /wallets/:walletId` | Uma principal e uma secundária, com endereços distintos |
@@ -83,6 +89,7 @@ Toda resposta de erro tem o mesmo corpo:
 | Conflito de disponibilidade | 409 `AVAILABILITY_CONFLICT` |
 | Cotação desatualizada | 409 `QUOTE_STALE`, com `details.quote` e `details.changes` |
 | Idempotência | 409 `IDEMPOTENCY_CONFLICT` |
+| Compra já em andamento | 409 `ORDER_PENDING`, com `details.orderId` |
 | Falha transitória | 503 `SERVICE_UNAVAILABLE`, 500 `INTERNAL_ERROR` |
 
 No cliente, o interceptor do Axios converte qualquer falha — resposta 4xx/5xx, rede, timeout, cancelamento — em um `ApiError` ([src/lib/http.ts](src/lib/http.ts)) com `code` estável. A interface decide o que mostrar pelo `code`, nunca pelo texto.
@@ -94,6 +101,8 @@ Valores trafegam como strings decimais (`"1.19"`). Para calcular, são convertid
 ### Idempotência do pedido
 
 O cliente gera uma `Idempotency-Key` por **tentativa de compra** e a guarda no `sessionStorage` junto com o corpo do pedido ([src/features/checkout/order-attempt.ts](src/features/checkout/order-attempt.ts)). Enquanto o corpo for o mesmo — clique repetido, nova tentativa após timeout ou falha de rede, refresh — a mesma chave é reenviada e a API devolve o pedido já criado. Corpo diferente (nova cotação, outra carteira) recebe chave nova. No mock, a mesma chave com corpo diferente responde 409 `IDEMPOTENCY_CONFLICT`.
+
+A chave protege a mesma tentativa; uma tentativa **nova** com o mesmo carrinho é barrada por outra regra: enquanto a conta tiver um pedido pendente, `POST /orders` responde 409 `ORDER_PENDING` com o id desse pedido, e a interface leva o usuário até ele. Sem isso, voltar ao pagamento durante a espera compraria os mesmos itens duas vezes, porque o carrinho só é esvaziado na confirmação.
 
 O `hash` da cotação faz parte do corpo. Ele cobre preço, quantidade, disponibilidade, cupom e taxa; se a cotação atual do servidor tiver outro hash, o pedido é recusado com `QUOTE_STALE` e nada é comprado.
 
@@ -113,7 +122,7 @@ Transporte: Socket.IO sobre WebSocket (sem long-polling), caminho `/socket.io`.
 O cliente emite `session.join { token }` ao conectar e ao entrar, e `session.leave` ao sair.
 
 - **Duplicatas e eventos antigos** ([src/realtime/events.ts](src/realtime/events.ts)): um `id` já visto é descartado; um evento só é aplicado se sua `version` for maior que a última conhecida do mesmo recurso. As respostas REST também registram a versão que trouxeram, para que um evento atrasado não regrida um dado mais novo vindo da API.
-- **Isolamento por usuário:** eventos privados só são entregues a conexões que fizeram `session.join` com o token do dono. No cliente, a troca de sessão zera o filtro de eventos e as chaves de cache privadas.
+- **Isolamento por usuário:** eventos privados só são entregues a conexões que fizeram `session.join` com o token do dono. No cliente, a troca de sessão zera o filtro de eventos e as chaves de cache privadas, e um `order.updated` cujo `userId` não é o da conta em tela é descartado (cobre o evento que chega logo depois do logout ou da troca de usuário).
 - **Ciclo de vida:** o provider registra os listeners ao montar e os remove (e desconecta) ao desmontar.
 
 ### Reconciliação entre REST e Socket.IO
@@ -168,7 +177,7 @@ Política definida em [src/lib/query-client.ts](src/lib/query-client.ts):
 ## 7. Mocks
 
 - **Ativação:** `VITE_ENABLE_MOCKS` (ligado por padrão). `src/main.tsx` inicia o MSW antes de renderizar a aplicação. Com a variável em `false`, o código dos mocks não é baixado.
-- **Persistência e reset:** o banco simulado e a configuração do cenário ficam no `localStorage`. `?reset-mocks` (ou `__kurioMocks.reset()`) recria tudo a partir das fixtures, que são determinísticas (gerador com semente fixa).
+- **Persistência e reset:** o banco simulado e a configuração do cenário ficam no `localStorage`. `?reset-mocks` (ou `__kurioMocks.reset()`) restaura o cenário conhecido por inteiro: banco recriado a partir das fixtures determinísticas (gerador com semente fixa), cenário `padrao` com os contadores de latência e de falhas zerados, pedidos agendados cancelados e histórico de eventos limpo. Como as sessões do banco deixam de existir, o token e o carrinho de visitante guardados no navegador também são descartados.
 - **Fixtures:** 239 NFTs em 9 categorias e 3 redes, dois usuários, três cupons.
 - **Rede e falhas** ([src/mocks/http.ts](src/mocks/http.ts), [src/mocks/config.ts](src/mocks/config.ts)): toda rota passa por latência do cenário → falha injetada → handler. As falhas podem ser resposta HTTP, erro de rede ou timeout, antes ou **depois** do handler (o efeito acontece, mas o cliente não fica sabendo), com limite de ocorrências.
 - **Controle** ([src/mocks/control.ts](src/mocks/control.ts)): `window.__kurioMocks` muda cenário, altera preço e disponibilidade, resolve pedidos, derruba conexões e reemite eventos. Ele age só no banco e no servidor Socket.IO simulados; o efeito chega à interface pelas respostas REST e pelo `socket.io-client`.
@@ -199,14 +208,16 @@ O workflow [.github/workflows/ci.yml](.github/workflows/ci.yml) roda a cada push
 
 - **Confirmação só com resposta da simulação:** o pedido nasce `pending`; a tela de confirmação e o link do explorador só aparecem quando o estado vira `confirmed`. Confirmado e recusado são terminais.
 - **Timeout no envio:** o aviso oferece "Tentar novamente", que reenvia exatamente o mesmo corpo. Se o pedido já tinha sido criado, ele é recuperado.
-- **Recibo como snapshot:** o pedido guarda itens, preços, taxa e total do momento da compra; mudanças posteriores no catálogo não o alteram. Hash da transação e link do Etherscan são simulados.
-- **Conexão da carteira:** vale para a combinação exata de carteira, provedor e rede; mudar qualquer um exige conectar de novo.
+- **Recibo como snapshot:** o pedido guarda itens, preços, taxa e total do momento da compra; mudanças posteriores no catálogo não o alteram. Hash da transação e link do explorador (Etherscan, Polygonscan ou Solscan, conforme a rede do pedido) são simulados.
+- **Conexão da carteira:** vale para a combinação exata de carteira, provedor e rede; mudar qualquer um exige conectar de novo. A API confere a mesma combinação ao receber o pedido.
+- **Uma compra por vez:** com um pedido pendente, uma nova confirmação abre esse pedido em vez de criar outro.
 - **Ações sem função real** não simulam sucesso: newsletter, login social e "esqueceu a senha" avisam que estão indisponíveis.
 - **Animações:** uma única curva de movimento, entradas curtas, destaque de valores alterados. Com `prefers-reduced-motion`, o conteúdo aparece no lugar, sem animação.
 
 ## 10. Acessibilidade
 
 - Navegação por teclado com foco visível em todos os controles; link "Pular para o conteúdo".
+- Cada tela define o título do documento ([src/lib/page-title.ts](src/lib/page-title.ts)); o detalhe usa o nome do NFT.
 - Diálogos e painéis (login, zoom da galeria, filtros no mobile) prendem o foco e o devolvem ao fechar (Radix, via shadcn/ui).
 - Campos com `label`, `aria-invalid` e mensagem de erro ligada por `aria-describedby`, inclusive para erros vindos da API.
 - Regiões vivas para o resultado da busca, a quantidade, o estado do pedido e os avisos de mutations e de eventos em tempo real.
@@ -241,6 +252,7 @@ Ajustes em relação ao layout, feitos por acessibilidade:
 | Perfil | Um único "Salvar", como no layout, que envia os dados do perfil e, se preenchida, a troca de senha | São duas operações da API, cada uma com seus erros |
 | Carteiras | "Igual à carteira principal" é uma caixa de seleção que pré-preenche o formulário; "Adicionar" some quando a carteira já existe | No layout é um rádio isolado, ao lado de um formulário vazio |
 | Perfil, carteiras e confirmação no mobile | Sem frame: seguem o padrão das telas mobile existentes | Pedido pelo enunciado |
+| Títulos das telas mobile | Abaixo de 400 px de largura o título usa 18 px em vez de 20 px | O frame tem 414 px; em 390 px "Pagamento com carteira" quebraria em duas linhas |
 
 ### Inconsistências do próprio arquivo
 
@@ -257,10 +269,39 @@ Ajustes em relação ao layout, feitos por acessibilidade:
 
 ## 12. Limitações
 
-- **Performance no perfil mobile do Lighthouse fica em 82–83**, abaixo da meta de 90. Causas e tentativas em [docs/lighthouse/ANALISE.md](docs/lighthouse/ANALISE.md).
+- A pré-renderização cobre só a variante mobile de duas rotas (início e detalhe do NFT). As demais telas e o desktop são renderizados no cliente.
 - Não há backend: os dados vivem no navegador de quem acessa. Limpar os dados do site ou usar `?reset-mocks` volta ao estado inicial.
 - O estado da conexão da carteira fica na tela de pagamento; ao recarregar, é preciso conectar de novo.
 - O endereço da carteira no pagamento não é editável ali: muda-se na tela de carteiras.
 - As baselines da regressão visual são específicas do sistema operacional (as versionadas são do Windows).
 - "Ofertas" não tem funcionalidade; Criadores, Aprenda e a central de ajuda têm conteúdo estático.
 - As redes sociais do rodapé apontam para a página inicial de cada rede, por não existir perfil da marca.
+
+## 13. Pré-renderização da primeira dobra
+
+A aplicação é uma SPA: sem nada além disso, o HTML chega vazio e a primeira pintura espera todo o JavaScript. No perfil mobile do Lighthouse isso dava LCP de quase 4 s. Para o conteúdo aparecer antes, o build pré-renderiza a primeira dobra das duas rotas auditadas.
+
+```
+pnpm build
+  tsc -b
+  vite build                                   → dist/ (cliente)
+  vite build --ssr src/prerender/render.tsx    → o mesmo código, para Node
+  node scripts/prerender.mjs                   → dist/index.html e dist/nft/<id>.html
+```
+
+| Etapa | Onde | O que faz |
+| --- | --- | --- |
+| Renderizar | [src/prerender/render.tsx](src/prerender/render.tsx) | Monta o roteador real com histórico em memória e renderiza a rota com `react-dom/server`. No servidor `useIsDesktop` é falso, então sai a variante mobile. Consultas não concluem, exceto o detalhe do NFT, semeado com o que a API simulada devolve num banco novo |
+| Gravar | [scripts/prerender.mjs](scripts/prerender.mjs) | Põe o HTML num `<template>` antes de `#root`, sem ids, rótulos ligados e animações de entrada, e acrescenta título e descrição por NFT |
+| Mostrar | script embutido no HTML | Antes da primeira pintura, coloca o conteúdo do `<template>` numa camada `#shell` (`inert`, `aria-hidden`) se o endereço for o da página e o viewport for mobile |
+| Carregar a aplicação | [src/main.tsx](src/main.tsx) | Espera a camada (e sua imagem principal) ser pintada, com teto de 1,5 s, e só então baixa os mocks e a aplicação |
+| Trocar | [src/lib/shell.ts](src/lib/shell.ts) | A aplicação monta por baixo e remove a camada: no início, quando a rota monta; no detalhe, quando a API responde; nas outras rotas, ao terminar de carregar. Há um limite de 8 s no próprio HTML |
+
+Regras que mantêm isso honesto:
+
+- **Mesmo código.** O HTML vem dos componentes e das rotas da aplicação; mudar uma tela muda o que é pré-renderizado no build seguinte.
+- **Sem dado velho.** A página inicial pré-renderizada não tem dados (grade em carregamento). A do detalhe tem os dados das fixtures e só é exibida enquanto o banco simulado ainda não existe no navegador — ou seja, na primeira visita, quando a API responderia exatamente aquilo. Depois disso (ou com `?cenario=` na URL) ela é ignorada e a tela começa pelo skeleton, como antes.
+- **Sem troca visível.** A camada e a tela real têm o mesmo conteúdo no momento da troca; o que fica abaixo da dobra (promoções, blog, descrição, relacionados) não é pré-renderizado.
+- **Sem depender do host.** Se `/nft/<id>` não for servido por `nft/<id>.html`, o fallback entrega `index.html`, o script vê que o endereço não é o da página e não mostra nada: a aplicação funciona como uma SPA comum.
+
+Efeito colateral útil: cada página de NFT tem `<title>` e descrição próprios já no HTML.

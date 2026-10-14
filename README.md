@@ -26,7 +26,7 @@ A entrega roda a partir de um checkout limpo, sem serviço externo.
 | Comando | O que faz |
 | --- | --- |
 | `pnpm dev` | Desenvolvimento com mocks (porta 5173) |
-| `pnpm build` | Verifica os tipos e gera o build de produção em `dist/` |
+| `pnpm build` | Verifica os tipos, gera o build de produção em `dist/` e pré-renderiza a primeira dobra mobile |
 | `pnpm preview` | Serve o build (porta 4173) |
 | `pnpm typecheck` | Verificação de tipos |
 | `pnpm lint` | ESLint |
@@ -63,7 +63,7 @@ Também é possível criar contas em **Criar conta**. Cupons: `KURIO10` (10%), `
 O estado dos mocks (catálogo, contas, carrinho, pedidos) fica no `localStorage` do navegador e sobrevive ao refresh.
 
 - **Selecionar um cenário:** abra qualquer página com `?cenario=<id>`, por exemplo `http://localhost:5173/?cenario=rede-lenta`. O parâmetro é consumido e some da URL; o cenário vale até ser trocado.
-- **Restaurar os dados iniciais:** abra qualquer página com `?reset-mocks`. Pode ser combinado: `/?reset-mocks&cenario=padrao`.
+- **Restaurar tudo:** abra qualquer página com `?reset-mocks`. Volta o banco às fixtures e o cenário a `padrao`, e encerra a sessão local. Pode ser combinado com outro cenário: `/?reset-mocks&cenario=rede-lenta`.
 - **Pelo console do navegador:** `window.__kurioMocks` expõe os mesmos controles (`setScenario("id")`, `reset()`, `updateNft(...)`, `resolveOrder(...)`, `dropConnections()`, `expireSessions()`…). É a mesma interface usada pelos testes.
 
 | Cenário (`id`) | O que acontece |
@@ -106,8 +106,10 @@ Em todos, comece com `?reset-mocks&cenario=<id>` e, quando precisar de login, us
 | Timeout após criar o pedido | `timeout-pedido` → confirmar a compra → esperar 10 s | Aviso "Não recebemos a confirmação"; "Tentar novamente" abre o **mesmo** pedido (`__kurioMocks.listOrders()` mostra um só) |
 | Pagamento recusado | `pagamento-recusado` → confirmar a compra | Recibo "Pagamento recusado"; o carrinho mantém os itens |
 | Pedido pendente | `pedido-pendente` → confirmar a compra | Fica pendente (inclusive após refresh). `__kurioMocks.resolveOrder("ord_0001", "confirmed")` conclui |
+| Segunda compra com pedido pendente | Com o pedido pendente, voltar a `/pagamento`, conectar e confirmar de novo | Aviso "Você já tem um pedido aguardando confirmação" e a tela do mesmo pedido; `listOrders()` continua com um só |
 | Queda de conexão com pedido pendente | Com o pedido pendente: `__kurioMocks.dropConnections({ refuseNew: true })`, depois `resolveOrder(...)` | O evento se perde; a página se atualiza pela consulta periódica. `restoreConnections()` religa o tempo real |
 | Evento duplicado ou antigo | Num detalhe: `updateNft(...)`, depois `replayEvent()` e `emitStaleNftEvent("nft-0009")` | O preço não muda de novo e não há segundo aviso |
+| Evento de outra conta | Deixar um pedido pendente, sair, entrar com a outra conta, `resolveOrder(...)` e `broadcastEvent()` | A segunda conta não recebe aviso nem vê o pedido, mesmo com o evento entregue a todas as conexões |
 
 ## Testes
 
@@ -119,7 +121,7 @@ pnpm test:e2e                            # ponta a ponta
 
 ### Unitários
 
-60 testes da lógica pura, sem navegador, ao lado do código que testam (`src/**/*.test.ts`):
+63 testes da lógica pura, sem navegador, ao lado do código que testam (`src/**/*.test.ts`):
 
 | Arquivo | Cobre |
 | --- | --- |
@@ -128,12 +130,13 @@ pnpm test:e2e                            # ponta a ponta
 | `features/checkout/order-attempt.test.ts` | Quando a chave de idempotência é reusada e quando muda |
 | `features/catalog/search.test.ts` | Estado do catálogo na URL e conversão para o contrato REST |
 | `features/auth/guards.test.ts` | Destino pós-login (sem redirecionamento aberto) e rotas privadas |
+| `lib/page-title.test.ts` | Título do documento de cada tela |
 | `mocks/domain/pricing.test.ts` | Cotação da API simulada: cupom, taxa por rede, indisponibilidade, hash; fusão do carrinho do visitante |
 | `mocks/config.test.ts` | Determinismo dos cenários: latência com semente, falhas com limite de ocorrências |
 
 ### Ponta a ponta
 
-75 testes em Chromium: 66 no viewport desktop (1440 × 900) e 9 no mobile (390 × 844). Cada teste usa um contexto novo do navegador, portanto parte do banco simulado no estado inicial. Os arquivos em [tests/](tests/) seguem os itens do enunciado:
+82 testes em Chromium: 72 no viewport desktop (1440 × 900) e 10 no mobile (390 × 844). Cada teste usa um contexto novo do navegador, portanto parte do banco simulado no estado inicial. Os arquivos em [tests/](tests/) seguem os itens do enunciado:
 
 | Arquivo | Cobre |
 | --- | --- |
@@ -142,13 +145,13 @@ pnpm test:e2e                            # ponta a ponta
 | `auth.spec.ts` | Cadastro, login, expiração (inclusive por relógio), logout, troca de usuário |
 | `favorites.spec.ts` | Persistência, falha da mutation com rollback, recuperação |
 | `cart.spec.ts` | Quantidades, remoção, cupom, persistência após refresh e login, rollback |
-| `checkout.spec.ts` | Compra completa, clique repetido, recusa, timeout com idempotência, preço/estoque no envio, carteira, sessão, snapshot do recibo |
+| `checkout.spec.ts` | Compra completa, clique repetido, segunda confirmação com pedido pendente, recusa, timeout com idempotência, preço/estoque no envio, carteira, sessão, snapshot do recibo, remoção só do que foi comprado |
 | `account.spec.ts` | Perfil, avatar, senha e carteiras, com erros de validação e da API |
-| `realtime.spec.ts` | `nft.updated` e `order.updated`, duplicata, evento antigo, desconexão, reconciliação, pedido pendente |
-| `a11y.spec.ts` | Teclado, foco em diálogos, erros associados, semântica, 390/768/1440 px, zoom, movimento reduzido |
-| `resilience.spec.ts` | Skeletons em rede lenta, erro e nova tentativa, offline, falha transitória |
+| `realtime.spec.ts` | `nft.updated` e `order.updated`, duplicata, evento antigo, evento de outra conta, desconexão, reconciliação, pedido pendente |
+| `a11y.spec.ts` | Teclado, foco em diálogos, erros associados, semântica, título de cada tela, 390/768/1440 px, zoom, movimento reduzido |
+| `resilience.spec.ts` | Skeletons em rede lenta, erro e nova tentativa, offline, falha transitória, reset dos mocks |
 | `visual.spec.ts` | Regressão visual de início, detalhe, carrinho e pagamento (desktop e mobile) |
-| `mobile.spec.ts` | Filtros em painel, compra completa, barra inferior, conta e pedido no mobile |
+| `mobile.spec.ts` | Filtros em painel, compra completa, barra inferior, conta e pedido no mobile, primeira dobra pré-renderizada |
 
 Os testes de tempo real só alteram o banco simulado ou derrubam conexões: o evento sai do servidor Socket.IO do mock e chega à página pelo `socket.io-client` da aplicação. Os de REST passam pelos handlers do MSW. Os cenários sensíveis a tempo (timeout do pedido, expiração da sessão) usam o relógio controlado do Playwright.
 
@@ -170,16 +173,18 @@ Audita início e detalhe do NFT, nos perfis mobile e desktop, três vezes cada, 
 
 | Página | Perfil | Performance | Accessibility | Best Practices | SEO |
 | --- | --- | --- | --- | --- | --- |
-| Início | desktop | 98 | 100 | 100 | 100 |
-| Detalhes do NFT | desktop | 98 | 100 | 100 | 100 |
-| Início | mobile | 82 | 100 | 100 | 100 |
-| Detalhes do NFT | mobile | 83 | 100 | 100 | 100 |
+| Início | desktop | 99 | 100 | 100 | 100 |
+| Detalhes do NFT | desktop | 99 | 100 | 100 | 100 |
+| Início | mobile | 98 | 100 | 100 | 100 |
+| Detalhes do NFT | mobile | 99 | 100 | 100 | 100 |
 
-Performance no perfil mobile fica abaixo da meta de 90. As causas, o que foi tentado e o que fecharia a diferença estão em [docs/lighthouse/ANALISE.md](docs/lighthouse/ANALISE.md); LCP, CLS, TBT, ambiente e versões estão em [docs/lighthouse/README.md](docs/lighthouse/README.md).
+Todas as medianas atingem as metas. O perfil mobile depende da pré-renderização da primeira dobra feita no build; como ela funciona e o que ela não faz estão em [docs/lighthouse/ANALISE.md](docs/lighthouse/ANALISE.md). LCP, CLS, TBT, ambiente e versões estão em [docs/lighthouse/README.md](docs/lighthouse/README.md).
 
 ## Deploy
 
-O projeto é um site estático (`dist/`). Há um [vercel.json](vercel.json) com o build, o fallback das rotas para `index.html` (acesso direto e refresh funcionam em qualquer rota) e o cache dos assets. Na Vercel, basta importar o repositório; nenhuma variável de ambiente é necessária, porque os mocks vêm ligados por padrão.
+O projeto é um site estático (`dist/`). Há um [vercel.json](vercel.json) com o build, o fallback das rotas para `index.html` (acesso direto e refresh funcionam em qualquer rota), URLs sem extensão e o cache dos assets. Na Vercel, basta importar o repositório; nenhuma variável de ambiente é necessária, porque os mocks vêm ligados por padrão.
+
+O build grava uma página por NFT em `dist/nft/<id>.html`, com a primeira dobra já no HTML. Ela é servida em `/nft/<id>` (`cleanUrls` na Vercel; Netlify e Cloudflare Pages fazem isso por padrão). Sem essa regra a aplicação funciona do mesmo jeito, pelo fallback, só sem o ganho de primeira pintura no detalhe.
 
 Em Netlify ou Cloudflare Pages, o equivalente é: comando `pnpm build`, pasta `dist` e uma regra de fallback de `/*` para `/index.html`.
 
@@ -195,8 +200,9 @@ src/
   components/   layout (header, rodapé, barra mobile), campos de formulário, shadcn/ui
   routes/       rotas por arquivo (TanStack Router)
   mocks/        MSW: handlers, regras de negócio, banco simulado, cenários, Socket.IO
+  prerender/    renderização da primeira dobra mobile no build
 tests/          Playwright (E2E e regressão visual)
 .github/        integração contínua
-scripts/        auditoria Lighthouse
+scripts/        pré-renderização e auditoria Lighthouse
 docs/           relatórios do Lighthouse
 ```

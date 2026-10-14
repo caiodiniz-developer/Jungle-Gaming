@@ -16,17 +16,36 @@ import {
   type MockConfig,
   type ScenarioId,
 } from "@/mocks/config";
+import { resetGuestCartId, setSessionToken } from "@/lib/session-storage";
 import { commit, db, resetDb } from "@/mocks/db";
 import { findNft, toNftSummary } from "@/mocks/domain/catalog";
 import { cancelOrderTimers, resolveOrder, toPublicOrder, updateNft } from "@/mocks/domain/orders";
 import {
+  broadcastEvent,
   connectionCount,
   dropConnections,
   emitRaw,
   getEventLog,
   replayEvent,
+  resetRealtime,
   restoreConnections,
 } from "@/mocks/realtime";
+
+/**
+ * Restaura integralmente o cenário conhecido: banco nas fixtures, cenário
+ * "padrao" com os contadores de latência e de falhas zerados, nenhum pedido
+ * agendado, servidor de eventos sem histórico. As sessões do banco deixam de
+ * existir, então o token e o carrinho de visitante guardados no navegador
+ * também são descartados (senão a próxima chamada responderia "sessão expirada").
+ */
+export async function resetMocks() {
+  cancelOrderTimers();
+  await resetDb();
+  setScenario("padrao");
+  resetRealtime();
+  setSessionToken(null);
+  resetGuestCartId();
+}
 
 // controles da simulação
 export const mockControl = {
@@ -40,12 +59,8 @@ export const mockControl = {
     commit();
   },
 
-  /** Restaura o banco para o cenário inicial. A página deve ser recarregada em seguida. */
-  async reset() {
-    cancelOrderTimers();
-    await resetDb();
-    dropConnections();
-  },
+  /** Restaura o banco e o cenário iniciais (ver resetMocks). A página deve ser recarregada em seguida. */
+  reset: resetMocks,
 
   /** Altera preço e/ou disponibilidade por edição; emite nft.updated. */
   updateNft(
@@ -58,6 +73,11 @@ export const mockControl = {
   /** Reenvia um evento já emitido com o mesmo id (duplicata). Sem argumento, o último. */
   replayEvent(eventId?: string) {
     return replayEvent(eventId)?.id ?? null;
+  },
+
+  /** Reentrega um evento a todas as conexões, mesmo as de outra conta (roteamento errado do servidor). */
+  broadcastEvent(eventId?: string) {
+    return broadcastEvent(eventId)?.id ?? null;
   },
 
   /** Entrega um nft.updated com versão anterior à atual e preço diferente (evento antigo). */

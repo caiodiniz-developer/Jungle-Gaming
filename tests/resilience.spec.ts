@@ -64,6 +64,23 @@ test.describe("Carregamento, falhas e recuperação", () => {
     await expect(cards(page)).toHaveCount(9);
   });
 
+  test("reset dos mocks restaura dados, cenário e sessão", async ({ app, page }) => {
+    await app.loginAndOpen("/nft/nft-0009");
+    await page.getByRole("button", { name: "COMPRAR" }).click();
+    await expect(app.cartLines()).toHaveCount(1);
+    await app.mocks("setScenario", "erro-servidor");
+
+    await app.open("/carrinho?reset-mocks");
+    // sessão encerrada sem aviso de expiração, carrinho vazio e catálogo de volta ao cenário padrão
+    await expect(page.getByRole("link", { name: "Entrar" })).toBeVisible();
+    await expect(page.getByText("Sua sessão expirou.")).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: "Seu carrinho está vazio" })).toBeVisible();
+    expect(await app.mocks<{ scenario: string }>("getConfig")).toMatchObject({ scenario: "padrao" });
+
+    await app.open("/");
+    await expect(cards(page)).toHaveCount(9);
+  });
+
   test("falha transitória (503 duas vezes): a consulta é repetida sozinha e a lista aparece", async ({
     app,
     page,

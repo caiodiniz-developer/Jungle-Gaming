@@ -81,6 +81,9 @@ test.describe("Pagamento e confirmação", () => {
     await app.confirmButton().click();
     // enquanto envia, o botão fica desabilitado: não há segundo envio
     await expect(page.getByRole("button", { name: "Enviando pedido…" })).toBeDisabled();
+    // o servidor precisa ter criado o pedido antes de o cliente desistir: avançar o relógio
+    // antes disso cancelaria a requisição ainda na latência simulada
+    await expect.poll(() => app.ordersOnServer()).toHaveLength(1);
     await page.clock.fastForward(11_000);
 
     await expect(page.getByText("Não recebemos a confirmação do envio.")).toBeVisible();
@@ -194,6 +197,48 @@ test.describe("Pagamento e confirmação", () => {
     await expect(app.order("confirmed")).toBeVisible();
     await expect(page.getByTestId("order-total")).toHaveText("1.706 ETH");
     await expect(page.getByTestId("order")).toContainText("1.69 ETH");
+  });
+
+  test("após a confirmação, só os itens e quantidades comprados saem do carrinho", async ({ app }) => {
+    await app.open("/", "pedido-pendente");
+    await app.addToCart("nft-0009");
+    await app.goToCheckout();
+    await app.confirmButton().click();
+    await expect(app.order("pending")).toBeVisible();
+    const orderId = app.orderId();
+
+    // com o pedido pendente, o carrinho ganha outro NFT e mais uma unidade do que foi pedido
+    await app.addToCart("nft-0207");
+    await app.addToCart("nft-0009");
+    await expect(app.cartLines()).toHaveCount(2);
+    const ordered = app.cartLines().filter({ hasText: "Sage Nomad #009" });
+    await expect(ordered.locator("output")).toHaveText("2");
+
+    await app.mocks("resolveOrder", orderId, "confirmed");
+
+    // sai 1 unidade de Sage Nomad (a comprada); o restante fica
+    await expect(ordered.locator("output")).toHaveText("1");
+    await expect(app.cartLines().filter({ hasText: "Golden Beat #207" })).toHaveCount(1);
+    await expect(app.cartLines()).toHaveCount(2);
+  });
+
+  test("pedido pendente: confirmar de novo no pagamento não cria uma segunda compra", async ({ app, page }) => {
+    await app.open("/", "pedido-pendente");
+    await app.addToCart();
+    await app.goToCheckout();
+    await app.confirmButton().click();
+    await expect(app.order("pending")).toBeVisible();
+    const orderId = app.orderId();
+
+    // o carrinho ainda tem os itens: o usuário volta ao pagamento e confirma outra vez
+    await app.open("/pagamento");
+    await app.connectWallet();
+    await app.confirmButton().click();
+
+    await expect(page.getByText("Você já tem um pedido aguardando confirmação.")).toBeVisible();
+    await expect(page).toHaveURL(new RegExp(`/pedidos/${orderId}$`));
+    await expect(app.order("pending")).toBeVisible();
+    expect(await app.ordersOnServer()).toHaveLength(1);
   });
 
   test("pedido inexistente e pedido de outra conta têm mensagens próprias", async ({ app, page }) => {

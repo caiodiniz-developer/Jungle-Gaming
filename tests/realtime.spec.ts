@@ -1,4 +1,4 @@
-import { expect, test } from "./support/app";
+import { expect, test, USERS } from "./support/app";
 
 /**
  * Todos os eventos saem do servidor Socket.IO simulado (MSW) e chegam à página
@@ -90,6 +90,22 @@ test.describe("Tempo real", () => {
     await expect(page.getByTestId("order-total")).toHaveText("2.016 ETH");
   });
 
+  test("a edição esgota durante o pagamento: a compra é bloqueada na hora", async ({ app, page }) => {
+    await app.addToCart("nft-0009");
+    await app.goToCheckout();
+    await expect(app.confirmButton()).toBeEnabled();
+
+    await app.mocks("updateNft", "nft-0009", { editions: { "1-50": 0 } });
+
+    await expect(page.getByText("A disponibilidade de Sage Nomad #009 mudou.")).toBeVisible();
+    await expect(page.getByText("Há itens indisponíveis no carrinho.")).toBeVisible();
+    await expect(app.confirmButton()).toBeDisabled();
+    expect(await app.ordersOnServer()).toHaveLength(0);
+
+    await page.getByRole("link", { name: "Voltar ao carrinho" }).click();
+    await expect(app.cartLines().first()).toContainText("a edição 1/50 esgotou.");
+  });
+
   test("cotação antiga é recusada pelo servidor mesmo que o evento se perca", async ({ app, page }) => {
     await app.addToCart("nft-0009");
     await app.goToCheckout();
@@ -141,6 +157,38 @@ test.describe("Tempo real", () => {
     await page.waitForTimeout(500);
     await expect(app.order("confirmed")).toBeVisible();
     expect(await app.ordersOnServer()).toEqual([expect.objectContaining({ id: orderId, status: "confirmed" })]);
+  });
+
+  test("evento de pedido de outra conta não chega à sessão seguinte nem altera seus dados", async ({ app, page }) => {
+    // a conta A deixa um pedido pendente e sai
+    await app.open("/", "pedido-pendente");
+    await app.addToCart();
+    await app.goToCheckout();
+    await app.confirmButton().click();
+    await expect(app.order("pending")).toBeVisible();
+    const orderId = app.orderId();
+    // o recibo é um diálogo modal no desktop: o menu da conta fica em outra tela
+    await app.open("/");
+    await page.getByRole("button", { name: /abrir menu da conta/ }).click();
+    await page.getByRole("menuitem", { name: "Sair" }).click();
+    await expect(page.getByRole("link", { name: "Entrar" })).toBeVisible();
+
+    // a conta B entra no mesmo navegador, com a mesma conexão Socket.IO
+    await app.loginAndOpen("/conta/atividade", USERS.other);
+    await expect(page.getByText("Você ainda não fez nenhum pedido.")).toBeVisible();
+    await expect.poll(() => app.mocks<number>("connectionCount")).toBeGreaterThan(0);
+
+    // o servidor entrega order.updated só ao dono: B não recebe nada
+    await app.mocks("resolveOrder", orderId, "confirmed");
+    // e mesmo que o servidor errasse o roteamento, o cliente descarta o evento de outra conta
+    expect(await app.mocks("broadcastEvent")).not.toBeNull();
+    await page.waitForTimeout(700);
+    await expect(page.getByText(`Pedido ${orderId} confirmado.`)).toHaveCount(0);
+    await expect(page.getByText("Você ainda não fez nenhum pedido.")).toBeVisible();
+
+    // a API também nega o recibo de A para B
+    await app.open(`/pedidos/${orderId}`);
+    await expect(page.getByRole("heading", { level: 1, name: "Este pedido pertence a outra conta" })).toBeVisible();
   });
 
   test("conexão cai com o pedido pendente: refresh e reconexão recuperam o estado sem nova compra", async ({

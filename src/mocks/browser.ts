@@ -1,7 +1,7 @@
 import { setupWorker } from "msw/browser";
 import { isScenarioId, setScenario } from "@/mocks/config";
-import { mockControl } from "@/mocks/control";
-import { initDb, resetDb } from "@/mocks/db";
+import { mockControl, resetMocks } from "@/mocks/control";
+import { initDb } from "@/mocks/db";
 import { resumePendingOrders } from "@/mocks/domain/orders";
 import { accountHandlers } from "@/mocks/handlers/account";
 import { authHandlers } from "@/mocks/handlers/auth";
@@ -30,7 +30,8 @@ async function applyUrlOptions() {
   const reset = url.searchParams.has("reset-mocks");
   if (scenario === null && !reset) return;
 
-  if (reset) await resetDb();
+  // o reset volta também ao cenário padrão; um `cenario` na mesma URL é aplicado em seguida
+  if (reset) await resetMocks();
   if (isScenarioId(scenario)) setScenario(scenario);
 
   url.searchParams.delete("cenario");
